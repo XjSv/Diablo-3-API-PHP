@@ -10,8 +10,8 @@ This document prepares developers and fan sites for Diablo 3's release.
 
 ## Methods Available
 
-###Get Career Profile
-###Get Hero Profile
-###Get Item Information
-###Get Follower Information
-###Get Artisan Information
+### Get Career Profile
+### Get Hero Profile
+### Get Item Information
+### Get Follower Information
+### Get Artisan Information
