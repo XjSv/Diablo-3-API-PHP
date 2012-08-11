@@ -11,24 +11,34 @@ class Diablo3 {
     private $follower_url;
     private $artisan_url;
 
-    private function __construct($battlenet_tag) {
+    public function __construct($battlenet_tag) {
         $this->battlenet_tag = $battlenet_tag;
-        $this->career_url    = $this->protocol.$this->host.'/api/d3/account/'.$this->battlenet_tag;
-        $this->hero_url      = $this->protocol.$this->host.'/api/d3/account/'.$this->battlenet_tag.'/hero/';
+        $this->career_url    = $this->protocol.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/';
+        $this->hero_url      = $this->protocol.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
         $this->item_url      = $this->protocol.$this->host.'/api/d3/data/item/';
         $this->follower_url  = $this->protocol.$this->host.'/api/d3/data/follower/';
         $this->artisan_url   = $this->protocol.$this->host.'/api/d3/data/artisan/';
     }
 
+    private function cURLcheckBasics() {
+        if(!function_exists("curl_init") &&
+           !function_exists("curl_setopt") &&
+           !function_exists("curl_exec") &&
+           !function_exists("curl_close")) return false;
+        else return true;
+    }
+
     private function getData($url) {
-        if($url) { return false; }
+        if(!$this->cURLcheckBasics()) { return false; }
+        if($url == '') { return false; }
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL,            $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($curl, CURLOPT_TIMEOUT,        30);
         curl_setopt($curl, CURLOPT_MAXREDIRS,      7);
+        curl_setopt($curl, CURLOPT_HEADER,         0);
 
         $data = curl_exec($curl);
         if($data === false) {
@@ -59,28 +69,20 @@ class Diablo3 {
     }
 
     public function getFollower($follower_type = null) {
-        if($follower_type == null || !in_array($follower_type, $followerTypes)) { return false; }
+        if($follower_type == null || !in_array($follower_type, $this->followerTypes)) { return false; }
 
         $data = $this->getData($this->follower_url.$follower_type);
         return $data;
     }
 
     public function getArtisan($artisan_type = null) {
-        if($artisan_type == null || !in_array($artisan_type, $artisanTypes)) { return false; }
+        if($artisan_type == null || !in_array($artisan_type, $this->artisanTypes)) { return false; }
 
         $data = $this->getData($this->artisan_url.$artisan_type);
         return $data;
     }
 
-    private function __desctruct() {
+    public function __desctruct() {
         unset($this->battlenet_tag);
     }
 }
-
-$Diablo3 = new Diablo3("XjSv-1677");
-
-$CAREER_DATA   = $Diablo3->getCareer();
-$HERO_DATA     = $Diablo3->getHero(1);
-$ITEM_DATA     = $Diablo3->getItem('COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD');
-$FOLLOWER_DATA = $Diablo3->getFollower('enchantress');
-$ARTISAN_DATA  = $Diablo3->getArtisan('blacksmith');
