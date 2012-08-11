@@ -12,9 +12,15 @@ class Diablo3 {
     private $artisan_url;
 
     public function __construct($battlenet_tag) {
-        $this->battlenet_tag = $battlenet_tag;
-        $this->career_url    = $this->protocol.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/';
-        $this->hero_url      = $this->protocol.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
+        if($battlenet_tag !== '') {
+            $this->battlenet_tag = (string)$battlenet_tag;
+            $this->career_url    = $this->protocol.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/';
+            $this->hero_url      = $this->protocol.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
+        } else {
+            error_log("Required Battle.net tag on line ".__LINE__." in file ".__FILE__);
+            die();
+        }
+
         $this->item_url      = $this->protocol.$this->host.'/api/d3/data/item/';
         $this->follower_url  = $this->protocol.$this->host.'/api/d3/data/follower/';
         $this->artisan_url   = $this->protocol.$this->host.'/api/d3/data/artisan/';
@@ -51,35 +57,35 @@ class Diablo3 {
 
     public function getCareer() {
         $data = $this->getData($this->career_url);
-        return $data;
+        return json_decode($data);
     }
 
     public function getHero($hero_id = null) {
         if($hero_id == null) { return false; }
 
         $data = $this->getData($this->hero_url.$hero_id);
-        return $data;
+        return json_decode($data);
     }
 
     public function getItem($item_data = null) {
         if($item_data == null) { return false; }
 
         $data = $this->getData($this->item_url.$item_data);
-        return $data;
+        return json_decode($data);
     }
 
     public function getFollower($follower_type = null) {
         if($follower_type == null || !in_array($follower_type, $this->followerTypes)) { return false; }
 
         $data = $this->getData($this->follower_url.$follower_type);
-        return $data;
+        return json_decode($data);
     }
 
     public function getArtisan($artisan_type = null) {
         if($artisan_type == null || !in_array($artisan_type, $this->artisanTypes)) { return false; }
 
         $data = $this->getData($this->artisan_url.$artisan_type);
-        return $data;
+        return json_decode($data);
     }
 
     public function __desctruct() {
