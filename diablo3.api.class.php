@@ -13,17 +13,31 @@ class Diablo3 {
 
     public function __construct($battlenet_tag) {
         if($battlenet_tag !== '') {
+            $hash = strpos($battlenet_tag, '#');
+            if($hash !== false) {
+                $battlenet_tag = str_replace('#', '-', $battlenet_tag);
+            }
+
+            //  Check if its a valid Battle.net tag (Pending)
+            //
+            if(!preg_match('/^.+(-[0-9]{4})/', $battlenet_tag)) {
+                error_log("Battle.net tag provided not valid.");
+                exit(0);
+            }
+
+            //  Set Variables
+            //
             $this->battlenet_tag = (string)$battlenet_tag;
             $this->career_url    = $this->protocol.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/';
             $this->hero_url      = $this->protocol.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
         } else {
-            error_log("Required Battle.net tag on line ".__LINE__." in file ".__FILE__);
-            die();
+            error_log("Required Battle.net tag");
+            exit(0);
         }
 
-        $this->item_url      = $this->protocol.$this->host.'/api/d3/data/item/';
-        $this->follower_url  = $this->protocol.$this->host.'/api/d3/data/follower/';
-        $this->artisan_url   = $this->protocol.$this->host.'/api/d3/data/artisan/';
+        $this->item_url     = $this->protocol.$this->host.'/api/d3/data/item/';
+        $this->follower_url = $this->protocol.$this->host.'/api/d3/data/follower/';
+        $this->artisan_url  = $this->protocol.$this->host.'/api/d3/data/artisan/';
     }
 
     private function cURLcheckBasics() {
@@ -35,8 +49,8 @@ class Diablo3 {
     }
 
     private function getData($url) {
-        if(!$this->cURLcheckBasics()) { return false; }
-        if($url == '') { return false; }
+        if(!$this->cURLcheckBasics()) return false;
+        if($url == '') return false;
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL,            $url);
@@ -61,28 +75,28 @@ class Diablo3 {
     }
 
     public function getHero($hero_id = null) {
-        if($hero_id == null) { return false; }
+        if($hero_id == null) return false;
 
         $data = $this->getData($this->hero_url.$hero_id);
         return json_decode($data, true);
     }
 
     public function getItem($item_data = null) {
-        if($item_data == null) { return false; }
+        if($item_data == null) return false;
 
         $data = $this->getData($this->item_url.$item_data);
         return json_decode($data, true);
     }
 
     public function getFollower($follower_type = null) {
-        if($follower_type == null || !in_array($follower_type, $this->followerTypes)) { return false; }
+        if($follower_type == null || !in_array($follower_type, $this->followerTypes)) return false;
 
         $data = $this->getData($this->follower_url.$follower_type);
         return json_decode($data, true);
     }
 
     public function getArtisan($artisan_type = null) {
-        if($artisan_type == null || !in_array($artisan_type, $this->artisanTypes)) { return false; }
+        if($artisan_type == null || !in_array($artisan_type, $this->artisanTypes)) return false;
 
         $data = $this->getData($this->artisan_url.$artisan_type);
         return json_decode($data, true);
