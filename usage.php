@@ -1,7 +1,7 @@
 <?php
 require_once('diablo3.api.class.php');
 
-$Diablo3 = new Diablo3("XjSv-1677"); // Battle.net Tag
+$Diablo3 = new Diablo3("XjSv#1677"); // Battle.net Tag
 
 $CAREER_DATA   = $Diablo3->getCareer();
 $HERO_DATA     = $Diablo3->getHero(3982160);  // Hero ID
