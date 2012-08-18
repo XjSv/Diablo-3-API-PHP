@@ -78,7 +78,7 @@ class Diablo3 {
             $data = json_decode($data, true);
         }
 
-        if(isset($data['code']) && ($data['code'] == 'OOPS' || $data['code'] == 'LIMITED')) {
+        if(isset($data['code']) && ($data['code'] == 'OOPS' || $data['code'] == 'LIMITED' || $data['code'] == 'MAINTENANCE')) {
             error_log('API Fail Reason: '.$data['reason']);
             $data = false;
         }
