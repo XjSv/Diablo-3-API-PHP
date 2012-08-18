@@ -22,7 +22,7 @@ class Diablo3 {
             //
             if(!preg_match('/^.+(-[0-9]{4})/', $battlenet_tag)) {
                 error_log("Battle.net tag provided not valid.");
-                exit(0);
+                //exit(0); // TODO: This is currently broken
             }
 
             //  Set Variables
