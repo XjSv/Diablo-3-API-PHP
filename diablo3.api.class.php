@@ -1,10 +1,11 @@
 <?php
 class Diablo3 {
     private $battlenet_tag;
-    private $protocol      = 'http://';
-    private $host          = 'us.battle.net';
-    private $followerTypes = array('enchantress', 'templar', 'scoundrel');
-    private $artisanTypes  = array('blacksmith', 'jeweler');
+    private $protocol       = 'http://';
+    private $host           = 'us.battle.net';
+    private $followerTypes  = array('enchantress', 'templar', 'scoundrel');
+    private $artisanTypes   = array('blacksmith', 'jeweler');
+    private $blizzardErrors = array('OOPS', 'LIMITED', 'MAINTENANCE'); // TODO: Pending
     private $career_url;
     private $hero_url;
     private $item_url;
@@ -59,26 +60,28 @@ class Diablo3 {
         curl_setopt($curl, CURLOPT_URL,            $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($curl, CURLOPT_TIMEOUT,        30);
-        curl_setopt($curl, CURLOPT_MAXREDIRS,      7);
+        curl_setopt($curl, CURLOPT_TIMEOUT,        20);
+        curl_setopt($curl, CURLOPT_MAXREDIRS,      3);
         curl_setopt($curl, CURLOPT_HEADER,         false);
+        curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
 
-        $data = curl_exec($curl);
+        $data        = curl_exec($curl);
+        $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
 
         // Debug
         //
         //error_log("URL: ".$url);
+        //error_log("HTTP Code: : ".$http_status);
         //error_log("Data: ".$data);
 
-        $error = strpos($data, 'Error report');
-        if($error) {
+        if($http_status == 404) {
             $data = false;
-        } else {
+        } else if($http_status == 200) {
             $data = json_decode($data, true);
         }
 
-        if(isset($data['code']) && ($data['code'] == 'OOPS' || $data['code'] == 'LIMITED' || $data['code'] == 'MAINTENANCE')) {
+        if(isset($data['code']) && (in_array($data['code'], $this->blizzardErrors, true))) {
             error_log('API Fail Reason: '.$data['reason']);
             $data = false;
         }
@@ -121,7 +124,7 @@ class Diablo3 {
     }
 
     public function getFollower($follower_type = null) {
-        if($follower_type == null || !in_array($follower_type, $this->followerTypes)) return 'Invalid/Empty Follower Type';
+        if($follower_type == null || !in_array($follower_type, $this->followerTypes, true)) return 'Invalid/Empty Follower Type';
 
         $data = $this->getData($this->follower_url.$follower_type);
 
@@ -133,7 +136,7 @@ class Diablo3 {
     }
 
     public function getArtisan($artisan_type = null) {
-        if($artisan_type == null || !in_array($artisan_type, $this->artisanTypes)) return 'Invalid/Empty Artisan Type';
+        if($artisan_type == null || !in_array($artisan_type, $this->artisanTypes, true)) return 'Invalid/Empty Artisan Type';
 
         $data = $this->getData($this->artisan_url.$artisan_type);
 
