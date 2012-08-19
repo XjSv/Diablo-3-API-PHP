@@ -1,7 +1,7 @@
 # Diablo 3 API PHP
 ================
 
-Diablo 3 Web API PHP Bridge (Beta)
+Diablo 3 Web API PHP Bridge
 
 This is ment to be very simple, easy to use and easy to repurpose for any other reason.
 
