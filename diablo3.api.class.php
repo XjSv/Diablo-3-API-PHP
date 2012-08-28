@@ -112,7 +112,7 @@ class Diablo3 {
     }
 
     public function getItem($item_data = null) {
-        if($item_data == null || !preg_match('/^[a-zA-Z0-9]+$/', $item_data)) return 'Invalid/Empty Item Data';
+        if($item_data == null || !preg_match('/^[a-zA-Z0-9_-]+$/', $item_data)) return 'Invalid/Empty Item Data';
 
         $data = $this->getData($this->item_url.$item_data);
 
