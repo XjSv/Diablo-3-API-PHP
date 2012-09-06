@@ -75,7 +75,9 @@ class Diablo3 {
         //error_log("HTTP Code: : ".$http_status);
         //error_log("Data: ".$data);
 
-        if($http_status == 404) {
+        if($http_status == 503) {
+            $data = false;
+        } else if($http_status == 404) {
             $data = false;
         } else if($http_status == 200) {
             $data = json_decode($data, true);
@@ -83,7 +85,7 @@ class Diablo3 {
 
         if(isset($data['code']) && (in_array($data['code'], $this->blizzardErrors, true))) {
             error_log('API Fail Reason: '.$data['reason']);
-            $data = false;
+            $data = false; // In case http status is other then 503 or 404
         }
 
         return $data;
