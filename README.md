@@ -3,9 +3,14 @@
 
 Diablo 3 Web API PHP Bridge
 
-This is ment to be very simple, easy to use and easy to repurpose for any other reason.
+This is meant to be very simple & easy to use.
+You are free to repurpose this for any other coding needs or projects.
 
-All the methods should always return a string back. At least thats the goal.
+Methods Return:
+Success - (array)  Data
+Failure - (string) 'No Data Return'
+
+Minimal validation is being done to the inputs. If you feel that is not enonugh, be my guest and improve it.
 
 Original API Documentation: http://blizzard.github.com/d3-api-docs/
 
@@ -16,4 +21,3 @@ Original API Documentation: http://blizzard.github.com/d3-api-docs/
 ### Get Item Information
 ### Get Follower Information
 ### Get Artisan Information
-

@@ -8,8 +8,34 @@ $ITEM_DATA     = $Diablo3->getItem('COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04
 $FOLLOWER_DATA = $Diablo3->getFollower('templar');                                              // Options: 'enchantress', 'templar', 'scoundrel' (string)
 $ARTISAN_DATA  = $Diablo3->getArtisan('blacksmith');                                            // Options: 'blacksmith', 'jeweler' (string)
 
-print_r($CAREER_DATA);
-print_r($HERO_DATA);
-print_r($ITEM_DATA);
-print_r($FOLLOWER_DATA);
-print_r($ARTISAN_DATA);
+// Before handling the data check to make sure the return is an array
+//
+if(is_array($CAREER_DATA)) {
+    print_r($CAREER_DATA);
+} else {
+    echo $CAREER_DATA; // Error message
+}
+
+if(is_array($HERO_DATA)) {
+    print_r($HERO_DATA);
+} else {
+    echo $HERO_DATA; // Error message
+}
+
+if(is_array($ITEM_DATA)) {
+    print_r($ITEM_DATA);
+} else {
+    echo $ITEM_DATA; // Error message
+}
+
+if(is_array($FOLLOWER_DATA)) {
+    print_r($FOLLOWER_DATA);
+} else {
+    echo $FOLLOWER_DATA; // Error message
+}
+
+if(is_array($ARTISAN_DATA)) {
+    print_r($ARTISAN_DATA);
+} else {
+    echo $ARTISAN_DATA; // Error message
+}
