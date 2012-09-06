@@ -3,12 +3,12 @@
 
 Diablo 3 Web API PHP Bridge
 
-This is meant to be very simple & easy to use.
-You are free to repurpose this for any other coding needs or projects.
+This is meant to be very simple & easy to use.  
+You are free to repurpose this for any other coding needs or projects.  
 
-Methods Return:
-Success - (array)  Data
-Failure - (string) 'No Data Return'
+Methods Return:  
+Success - (array)  Data  
+Failure - (string) 'No Data Return'  
 
 Minimal validation is being done to the inputs. If you feel that is not enonugh, be my guest and improve it.
 
