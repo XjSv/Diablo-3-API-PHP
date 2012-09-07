@@ -1,24 +1,29 @@
 <?php
 class Diablo3 {
     private $battlenet_tag;
-    private $protocol       = 'http://';
-    private $host           = 'us.battle.net';
-    private $followerTypes  = array('enchantress', 'templar', 'scoundrel');
-    private $artisanTypes   = array('blacksmith', 'jeweler');
-    private $blizzardErrors = array('OOPS', 'LIMITED', 'MAINTENANCE'); // TODO: Pending
+    private $protocol          = 'http://';
+    private $host              = '.battle.net';
+    private $battlenet_servers = array('us', 'eu', 'sea');
+    private $followerTypes     = array('enchantress', 'templar', 'scoundrel');
+    private $artisanTypes      = array('blacksmith', 'jeweler');
+    private $blizzardErrors    = array('OOPS', 'LIMITED', 'MAINTENANCE', 'NOTFOUND');
     private $career_url;
     private $hero_url;
     private $item_url;
     private $follower_url;
     private $artisan_url;
 
-    public function __construct($battlenet_tag) {
+    public function __construct($battlenet_tag, $server = null) {
         if($battlenet_tag !== '') {
             $hash = strpos($battlenet_tag, '#');
             if($hash !== false) {
                 $battlenet_tag = str_replace('#', '-', $battlenet_tag);
             }
-            
+
+            if(($server == null) || !in_array($server, $this->battlenet_servers, true)) {
+                $server = 'us';
+            }
+
             $battlenet_tag = urlencode($battlenet_tag);
 
             //  Check if its a valid Battle.net tag (Pending)
@@ -31,16 +36,16 @@ class Diablo3 {
             //  Set Variables
             //
             $this->battlenet_tag = (string)$battlenet_tag;
-            $this->career_url    = $this->protocol.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/';
-            $this->hero_url      = $this->protocol.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
+            $this->career_url    = $this->protocol.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/index';
+            $this->hero_url      = $this->protocol.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
         } else {
             error_log("Required Battle.net tag");
             exit(0);
         }
 
-        $this->item_url     = $this->protocol.$this->host.'/api/d3/data/item/';
-        $this->follower_url = $this->protocol.$this->host.'/api/d3/data/follower/';
-        $this->artisan_url  = $this->protocol.$this->host.'/api/d3/data/artisan/';
+        $this->item_url     = $this->protocol.$server.$this->host.'/api/d3/data/item/';
+        $this->follower_url = $this->protocol.$server.$this->host.'/api/d3/data/follower/';
+        $this->artisan_url  = $this->protocol.$server.$this->host.'/api/d3/data/artisan/';
     }
 
     private function cURLcheckBasics() {
