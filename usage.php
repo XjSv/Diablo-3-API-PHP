@@ -1,5 +1,21 @@
 <?php
+// For timing
+$time  = microtime();
+$time  = explode(' ', $time);
+$time  = $time[1] + $time[0];
+$start = $time;
+// For timing
+
 require_once('diablo3.api.class.php');
+
+// Optional
+//
+require_once('functions.php');
+
+// Settings
+//
+set_time_limit(0);
+ini_set('memory_limit', '128M');
 
 $Diablo3       = new Diablo3("XjSv#1677", 'us');                                                // Battle.net Tag. (e.g. 'XjSv#1677' or 'XjSv-1677') (string), Server Options: 'us', 'eu', 'sea' (string) [Optional Defaults to 'us']
 $CAREER_DATA   = $Diablo3->getCareer();
@@ -39,3 +55,18 @@ if(is_array($ARTISAN_DATA)) {
 } else {
     echo $ARTISAN_DATA; // Error message
 }
+
+// Function included in functions.php
+//
+$user_profiles = array("XjSv#1677", "ZijaD#1113", "taDo#1510");
+print_r(getAllTheData($user_profiles, 'us'));
+
+// For timing
+$time       = microtime();
+$time       = explode(' ', $time);
+$time       = $time[1] + $time[0];
+$finish     = $time;
+$total_time = round(($finish - $start), 4);
+$total_time = secondsToTime($total_time);
+echo '<br>Proccess finished in '.$total_time.' seconds.'."<br>";
+// For timing

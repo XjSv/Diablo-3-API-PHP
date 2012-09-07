@@ -72,28 +72,36 @@ class Diablo3 {
         curl_setopt($curl, CURLOPT_HEADER,         false);
         curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
 
-        $data        = curl_exec($curl);
-        $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $data  = curl_exec($curl);
+        $error = curl_errno($curl);
+
+        if($error) {
+            error_log('cURL Error: '.$error);
+            $data = false;
+        } else {
+            $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+            // Debug
+            //
+            //error_log("URL: ".$url);
+            //error_log("HTTP Code: : ".$http_status);
+            //error_log("Data: ".$data);
+
+            if($http_status == 503) {
+                $data = false;
+            } else if($http_status == 404) {
+                $data = false;
+            } else if($http_status == 200) {
+                $data = json_decode($data, true);
+            }
+
+            if(isset($data['code']) && (in_array($data['code'], $this->blizzardErrors, true))) {
+                error_log('API Fail Reason: '.$data['reason']);
+                $data = false; // In case http status is other then 503 or 404
+            }
+        }
+
         curl_close($curl);
-
-        // Debug
-        //
-        //error_log("URL: ".$url);
-        //error_log("HTTP Code: : ".$http_status);
-        //error_log("Data: ".$data);
-
-        if($http_status == 503) {
-            $data = false;
-        } else if($http_status == 404) {
-            $data = false;
-        } else if($http_status == 200) {
-            $data = json_decode($data, true);
-        }
-
-        if(isset($data['code']) && (in_array($data['code'], $this->blizzardErrors, true))) {
-            error_log('API Fail Reason: '.$data['reason']);
-            $data = false; // In case http status is other then 503 or 404
-        }
 
         return $data;
     }
