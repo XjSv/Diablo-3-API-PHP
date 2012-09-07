@@ -24,7 +24,7 @@ class Diablo3 {
                 $server = 'us';
             }
 
-            $battlenet_tag = urlencode(utf8_encode($battlenet_tag));
+            $battlenet_tag = urlencode($battlenet_tag);
 
             //  Check if its a valid Battle.net tag (Pending)
             //
