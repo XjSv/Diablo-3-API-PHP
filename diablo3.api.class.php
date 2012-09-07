@@ -3,7 +3,7 @@ class Diablo3 {
     private $battlenet_tag;
     private $protocol          = 'http://';
     private $host              = '.battle.net';
-    private $battlenet_servers = array('us', 'eu', 'sea');
+    private $battlenet_servers = array('us', 'eu', 'sea', 'tw', 'kr');
     private $followerTypes     = array('enchantress', 'templar', 'scoundrel');
     private $artisanTypes      = array('blacksmith', 'jeweler');
     private $blizzardErrors    = array('OOPS', 'LIMITED', 'MAINTENANCE', 'NOTFOUND');
