@@ -17,7 +17,7 @@ require_once('functions.php');
 set_time_limit(0);
 ini_set('memory_limit', '128M');
 
-$Diablo3       = new Diablo3("XjSv#1677", 'us');                                                // Battle.net Tag. (e.g. 'XjSv#1677' or 'XjSv-1677') (string), Server Options: 'us', 'eu', 'sea' (string) [Optional Defaults to 'us']
+$Diablo3       = new Diablo3("XjSv#1677", 'us', 'en');                                          // Battle.net Tag. (e.g. 'XjSv#1677' or 'XjSv-1677') (string), Server: 'us', 'eu', etc. (string) [Optional, Defaults to 'us'], Locale: 'en', 'es', etc. (string)
 $CAREER_DATA   = $Diablo3->getCareer();
 $HERO_DATA     = $Diablo3->getHero(3982160);                                                    // Hero ID (int)
 $ITEM_DATA     = $Diablo3->getItem('COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD'); // Item Data 'COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD'  (string)
@@ -59,7 +59,7 @@ if(is_array($ARTISAN_DATA)) {
 // Function included in functions.php
 //
 $user_profiles = array("XjSv#1677", "ZijaD#1113", "taDo#1510");
-print_r(getAllTheData($user_profiles, 'us'));
+print_r(getAllTheData($user_profiles, 'us', 'en'));
 
 // For timing
 $time       = microtime();
