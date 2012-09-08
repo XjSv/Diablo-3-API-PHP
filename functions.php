@@ -21,16 +21,17 @@ function secondsToTime($seconds) {
     return $time;
 }
 
-function getAllTheData($battlenet_tags = array(), $server = 'us') {
+function getAllTheData($battlenet_tags = array(), $server = 'us', $locale = 'en') {
     if(!(count($battlenet_tags) > 0)) return false;
-    if(!in_array($server, array('us', 'eu', 'sea'), true)) $server = 'us';
+    if(!in_array($server, array('us', 'eu', 'sea', 'tw', 'kr'), true)) $server = 'us';
+    if(!in_array($locale, array('en', 'es', 'pt', 'it', 'de', 'fr', 'pl', 'ru', 'tr', 'ko', 'zh'), true)) $locale = 'en';
 
     $return_array = array();
 
     require_once('diablo3.api.class.php');
 
     foreach($battlenet_tags as $user) {
-        $Diablo3     = new Diablo3($user, $server);  // Battle.net Tag ID. 'XjSv#1677' or 'XjSv-1677' (string), Server (string) "en"
+        $Diablo3     = new Diablo3($user, $server, $locale);  // Battle.net Tag ID. 'XjSv#1677' or 'XjSv-1677' (string), Server (string) "en"
         $CAREER_DATA = $Diablo3->getCareer();
 
         if(is_array($CAREER_DATA)) {
