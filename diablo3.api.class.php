@@ -4,24 +4,30 @@ class Diablo3 {
     private $protocol          = 'http://';
     private $host              = '.battle.net';
     private $battlenet_servers = array('us', 'eu', 'sea', 'tw', 'kr');
+    private $locales           = array('en', 'es', 'pt', 'it', 'de', 'fr', 'pl', 'ru', 'tr', 'ko', 'zh');
     private $followerTypes     = array('enchantress', 'templar', 'scoundrel');
     private $artisanTypes      = array('blacksmith', 'jeweler');
     private $blizzardErrors    = array('OOPS', 'LIMITED', 'MAINTENANCE', 'NOTFOUND');
+    private $current_locale;
     private $career_url;
     private $hero_url;
     private $item_url;
     private $follower_url;
     private $artisan_url;
 
-    public function __construct($battlenet_tag, $server = null) {
+    public function __construct($battlenet_tag, $server = 'us', $locale = 'en') {
         if($battlenet_tag !== '') {
             $hash = strpos($battlenet_tag, '#');
             if($hash !== false) {
                 $battlenet_tag = str_replace('#', '-', $battlenet_tag);
             }
 
-            if(($server == null) || !in_array($server, $this->battlenet_servers, true)) {
+            if(!in_array($server, $this->battlenet_servers, true)) {
                 $server = 'us';
+            }
+
+            if(!in_array($locale, $this->locales, true)) {
+                $this->current_locale = 'en';
             }
 
             $battlenet_tag = urlencode($battlenet_tag);
@@ -35,9 +41,10 @@ class Diablo3 {
 
             //  Set Variables
             //
-            $this->battlenet_tag = (string)$battlenet_tag;
-            $this->career_url    = $this->protocol.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/index';
-            $this->hero_url      = $this->protocol.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
+            $this->current_locale = (string)$locale;
+            $this->battlenet_tag  = (string)$battlenet_tag;
+            $this->career_url     = $this->protocol.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/index';
+            $this->hero_url       = $this->protocol.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
         } else {
             error_log("Required Battle.net tag");
             exit(0);
@@ -62,6 +69,10 @@ class Diablo3 {
             error_log("cURL is NOT Available");
             return false;
         }
+
+        // Append Locale Variable
+        //
+        $url = $url.'?locale='.$this->current_locale;
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL,            $url);
