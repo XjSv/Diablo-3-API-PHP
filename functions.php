@@ -21,10 +21,10 @@ function secondsToTime($seconds) {
     return $time;
 }
 
-function getAllTheData($battlenet_tags = array(), $server = 'us', $locale = 'en') {
+function getAllTheData($battlenet_tags = array(), $server = 'us', $locale = 'en_US') {
     if(!(count($battlenet_tags) > 0)) return false;
-    if(!in_array($server, array('us', 'eu', 'sea', 'tw', 'kr'), true)) $server = 'us';
-    if(!in_array($locale, array('en', 'es', 'pt', 'it', 'de', 'fr', 'pl', 'ru', 'tr', 'ko', 'zh'), true)) $locale = 'en';
+    if(!in_array($server, array('us', 'eu', 'tw', 'kr', 'cn'), true)) $server = 'us';
+    if(!in_array($locale, array('en_US', 'es_MX', 'en_GB', 'it_IT', 'es_ES', 'pt_PT', 'fr_FR', 'ru_RU', 'pl_PL', 'de_DE', 'ko_KR', 'en_US', 'zh_TW', 'en_US', 'zh_CN', 'en_US'), true)) $locale = 'en_US';
 
     $return_array = array();
 
