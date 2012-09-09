@@ -3,8 +3,8 @@ class Diablo3 {
     private $battlenet_tag;
     private $protocol          = 'http://';
     private $host              = '.battle.net';
-    private $battlenet_servers = array('us', 'eu', 'sea', 'tw', 'kr');
-    private $locales           = array('en', 'es', 'pt', 'it', 'de', 'fr', 'pl', 'ru', 'tr', 'ko', 'zh');
+    private $battlenet_servers = array('us', 'eu', 'tw', 'kr', 'cn');
+    private $locales           = array('en_US', 'es_MX', 'en_GB', 'it_IT', 'es_ES', 'pt_PT', 'fr_FR', 'ru_RU', 'pl_PL', 'de_DE', 'ko_KR', 'en_US', 'zh_TW', 'en_US', 'zh_CN', 'en_US');
     private $followerTypes     = array('enchantress', 'templar', 'scoundrel');
     private $artisanTypes      = array('blacksmith', 'jeweler');
     private $blizzardErrors    = array('OOPS', 'LIMITED', 'MAINTENANCE', 'NOTFOUND');
@@ -15,7 +15,7 @@ class Diablo3 {
     private $follower_url;
     private $artisan_url;
 
-    public function __construct($battlenet_tag, $server = 'us', $locale = 'en') {
+    public function __construct($battlenet_tag, $server = 'us', $locale = 'en_US') {
         if($battlenet_tag !== '') {
             $hash = strpos($battlenet_tag, '#');
             if($hash !== false) {
@@ -24,10 +24,13 @@ class Diablo3 {
 
             if(!in_array($server, $this->battlenet_servers, true)) {
                 $server = 'us';
+            } else if($server == 'cn') {
+                $server     = '';
+                $this->host = 'www.battlenet.com.cn'; // cn.battle.net
             }
 
             if(!in_array($locale, $this->locales, true)) {
-                $this->current_locale = 'en';
+                $this->current_locale = 'en_US';
             }
 
             $battlenet_tag = urlencode($battlenet_tag);
