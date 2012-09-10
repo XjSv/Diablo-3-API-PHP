@@ -26,14 +26,12 @@ class Diablo3 {
                 $server = 'us';
             } else if($server == 'cn') {
                 $server     = '';
-                $this->host = 'www.battlenet.com.cn'; // cn.battle.net
+                $this->host = 'www.battlenet.com.cn'; // Hack for 'cn.battle.net'
             }
 
             if(!in_array($locale, $this->locales, true)) {
-                $this->current_locale = 'en_US';
+                $locale = 'en_US';
             }
-
-            $battlenet_tag = urlencode($battlenet_tag);
 
             //  Check if its a valid Battle.net tag (Pending)
             //
@@ -44,8 +42,8 @@ class Diablo3 {
 
             //  Set Variables
             //
-            $this->current_locale = (string)$locale;
-            $this->battlenet_tag  = (string)$battlenet_tag;
+            $this->current_locale = $locale;
+            $this->battlenet_tag  = urlencode($battlenet_tag);
             $this->career_url     = $this->protocol.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/index';
             $this->hero_url       = $this->protocol.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
         } else {
