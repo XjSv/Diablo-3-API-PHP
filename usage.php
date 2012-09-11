@@ -58,8 +58,8 @@ if(is_array($ARTISAN_DATA)) {
 
 // Function included in functions.php
 //
-$user_profiles = array("XjSv#1677", "ZijaD#1113", "taDo#1510");
-print_r(getAllTheData($user_profiles, 'us', 'en_US'));
+//$user_profiles = array("XjSv#1677", "ZijaD#1113", "taDo#1510");
+//print_r(getAllTheData($user_profiles, 'us', 'en_US'));
 
 // For timing
 $time       = microtime();
