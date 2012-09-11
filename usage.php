@@ -56,7 +56,7 @@ if(is_array($ARTISAN_DATA)) {
     echo $ARTISAN_DATA; // Error message
 }
 
-// Function included in functions.php
+// Function included in functions.php (Optional un-comment if you want)
 //
 //$user_profiles = array("XjSv#1677", "ZijaD#1113", "taDo#1510");
 //print_r(getAllTheData($user_profiles, 'us', 'en_US'));
