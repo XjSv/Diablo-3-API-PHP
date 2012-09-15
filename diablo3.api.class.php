@@ -96,7 +96,7 @@ class Diablo3 {
 
     /**
      * curlSaveImage
-     * Get image with cURL, save it in $item_save_loc and return the image location
+     * Get image with cURL, save it in $location and return the image location
      *
      * Parameters:
      *     (location) - save location (items or skills)
