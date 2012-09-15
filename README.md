@@ -4,7 +4,7 @@
 Diablo 3 Web API PHP Bridge
 
 This is meant to be very simple & easy to use.  
-You are free to repurpose this for any other coding needs or projects.  
+You are free to re-purpose this for any other coding needs or projects.  
 
 Minimal validation is being done to the inputs. If you feel that is not enonugh, be my guest and improve it.
 
