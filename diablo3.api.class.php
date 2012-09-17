@@ -11,13 +11,13 @@
 
 class Diablo3 {
     private $battlenet_tag;
-    private $host              = '.battle.net';
-    private $media_host        = '.media.blizzard.com';
-    private $battlenet_servers = array('us', 'eu', 'tw', 'kr', 'cn');
-    private $locales           = array('en_US', 'es_MX', 'en_GB', 'it_IT', 'es_ES', 'pt_PT', 'fr_FR', 'ru_RU', 'pl_PL', 'de_DE', 'ko_KR', 'en_US', 'zh_TW', 'en_US', 'zh_CN', 'en_US');
-    private $followerTypes     = array('enchantress', 'templar', 'scoundrel');
-    private $artisanTypes      = array('blacksmith', 'jeweler');
-    private $blizzardErrors    = array('OOPS', 'LIMITED', 'MAINTENANCE', 'NOTFOUND');
+    private $host                = '.battle.net';
+    private $media_host          = '.media.blizzard.com';
+    private $battlenet_servers   = array('us', 'eu', 'tw', 'kr', 'cn');
+    private $locales             = array('en_US', 'es_MX', 'en_GB', 'it_IT', 'es_ES', 'pt_PT', 'fr_FR', 'ru_RU', 'pl_PL', 'de_DE', 'ko_KR', 'en_US', 'zh_TW', 'en_US', 'zh_CN', 'en_US');
+    private $followerTypes       = array('enchantress', 'templar', 'scoundrel');
+    private $artisanTypes        = array('blacksmith', 'jeweler');
+    private $blizzardErrors      = array('OOPS', 'LIMITED', 'MAINTENANCE', 'NOTFOUND');
     private $current_locale;
     private $career_url;
     private $hero_url;
@@ -25,12 +25,16 @@ class Diablo3 {
     private $follower_url;
     private $artisan_url;
     private $item_img_url;
-    private $item_img_sizes    = array('small', 'large');
+    private $item_img_sizes      = array('small', 'large');
     private $skill_img_url;
-    private $skill_img_sizes   = array('21', '42', '64');
-    private $item_save_loc     = '/img/items/';   // Relative to DOCUMENT_ROOT
-    private $skills_save_loc   = '/img/skills/';  // Relative to DOCUMENT_ROOT
+    private $skill_img_sizes     = array('21', '42', '64');
+    private $item_save_loc       = '/diablo/img/items/';   // Relative to DOCUMENT_ROOT
+    private $skills_save_loc     = '/diablo/img/skills/';  // Relative to DOCUMENT_ROOT
+    private $paperdolls_save_loc = '/diablo/img/paperdolls/';  // Relative to DOCUMENT_ROOT
     private $skill_url;
+    private $paperdoll_url;
+    private $genders             = array('male', 'female');
+    private $classes             = array('barbarian', 'witch-doctor', 'demon-hunter', 'monk', 'wizard');
 
     public function __construct($battlenet_tag, $server = 'us', $locale = 'en_US') {
         if($battlenet_tag !== '') {
@@ -77,6 +81,7 @@ class Diablo3 {
         $this->item_img_url  = 'http://'.$server.$this->media_host.'/d3/icons/items/';
         $this->skill_img_url = 'http://'.$server.$this->media_host.'/d3/icons/skills/';
         $this->skill_url     = 'http://'.$server.$this->host.'/d3/'.substr($locale, 0, -3).'/tooltip/';
+        $this->paperdoll_url = 'http://'.$server.$this->host.'/d3/static/images/profile/hero/paperdoll/';
     }
 
     /**
@@ -96,7 +101,7 @@ class Diablo3 {
 
     /**
      * curlSaveImage
-     * Get image with cURL, save it in $location and return the image location
+     * Get image with cURL, save it in $item_save_loc and return the image location
      *
      * Parameters:
      *     (location) - save location (items or skills)
@@ -104,27 +109,36 @@ class Diablo3 {
      *     (icon)     - icon name
      *     (size)     - image sizes
      */
-    private function curlSaveImage($location, $url, $icon, $size) {
-        if(empty($location) || empty($url) || empty($icon) || empty($size)) return false;
+    private function curlSaveImage($location, $url, $icon, $size = '') {
+        if(empty($location) || empty($url) || empty($icon)) return false;
 
         if($location == 'items') {
             $real_item_path  = $_SERVER['DOCUMENT_ROOT'].$this->item_save_loc;
             $return_location = $this->item_save_loc;
+            $size            = $size.'/';
+            $ext             = '.png';
         } else if($location == 'skills') {
             $real_item_path  = $_SERVER['DOCUMENT_ROOT'].$this->skills_save_loc;
             $return_location = $this->skills_save_loc;
+            $size            = $size.'/';
+            $ext             = '.png';
+        } else if($location == 'paperdolls') {
+            $real_item_path  = $_SERVER['DOCUMENT_ROOT'].$this->paperdolls_save_loc;
+            $return_location = $this->paperdolls_save_loc;
+            $size            = '';
+            $ext             = '.jpg';
         } else {
             return false;
         }
 
-        if(!file_exists($real_item_path.$size.'/'.$icon.'.png')) {
-            if(is_dir($real_item_path.$size.'/') && is_writable($real_item_path.$size.'/')) {
+        if(!file_exists($real_item_path.$size.$icon.$ext)) {
+            if(is_dir($real_item_path.$size) && is_writable($real_item_path.$size)) {
                 if(!$this->cURLcheckBasics()) {
                     error_log("cURL is NOT Available");
                     return false;
                 }
 
-                $fp   = fopen($real_item_path.$size.'/'.$icon.'.png', 'wb');
+                $fp   = fopen($real_item_path.$size.$icon.$ext, 'wb');
                 $curl = curl_init();
                 curl_setopt($curl, CURLOPT_URL,            $url);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -147,7 +161,7 @@ class Diablo3 {
                     if($http_status >= 400 && $http_status <= 599) {
                         $data = false;
                     } else if($http_status >= 200 && $http_status <= 399) {
-                        $data = $return_location.$size.'/'.$icon.'.png';
+                        $data = $return_location.$size.$icon.$ext;
                     } else {
                         $data = false;
                     }
@@ -158,11 +172,11 @@ class Diablo3 {
 
                 return $data;
             } else {
-                error_log("Wrong Image Size or Directory: '".$real_item_path.$size.'/'."' not writable");
+                error_log("Wrong Image Size or Directory: '".$real_item_path.$size."' not writable");
                 return false;
             }
         } else {
-            return $return_location.$size.'/'.$icon.'.png';
+            return $return_location.$size.$icon.$ext;
         }
     }
 
@@ -276,10 +290,10 @@ class Diablo3 {
 
     /**
      * getSkillToolTip
-     * Get
+     * Get Skill or Skill Rune Tooltip
      *
      * Parameters:
-     *     (tooltipUrl) - String of tooltipUrl (rune/barbarian/frenzy/a)
+     *     (tooltipUrl) - String of tooltipUrl (e.g. rune/barbarian/frenzy/a)
      *     (jsonp)      - True to return in jsonp format (boolean)
      */
     public function getSkillToolTip($tooltipUrl = null, $jsonp = false) {
@@ -291,6 +305,26 @@ class Diablo3 {
         }
 
         $data = $this->curlRequest($this->skill_url.$tooltipUrl.$jsonp_ext);
+
+        if($data) {
+            return $data;
+        } else {
+            return 'No Data Return';
+        }
+    }
+
+    /**
+     * getPaperDoll
+     * Get character paperdoll (background image)
+     *
+     * Parameters:
+     *     (class)  - Class (barbarian, witch-doctor, demon-hunter, monk, wizard)
+     *     (gender) - Gender (male or female)
+     */
+    public function getPaperDoll($class = null, $gender = 'male') {
+        if($class == null || !in_array($class, $this->classes, true) || !in_array($gender, $this->genders, true)) return 'No/Wrong class provided or wrong gender type.';
+
+        $data = $this->curlSaveImage('paperdolls', $this->paperdoll_url.$class.'-'.$gender.'.jpg', $class.'-'.$gender);
 
         if($data) {
             return $data;

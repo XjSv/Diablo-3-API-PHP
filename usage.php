@@ -22,6 +22,7 @@ $ITEM_IMAGE         = $Diablo3->getItemImage('unique_chest_013_104_demonhunter_m
 $SKILL_IMAGE        = $Diablo3->getSkillImage('barbarian_frenzy', '64');                                  // Icon Name, Size: Options: '21', '42', '64' (string)
 $SKILL_TOOLTIP      = $Diablo3->getSkillToolTip('skill/barbarian/frenzy', true);                          // tooltipUrl, true for jsonp
 $SKILL_RUNE_TOOLTIP = $Diablo3->getSkillToolTip('rune/frenzy/a', false);                                  // tooltipUrl, true for jsonp
+$PAPERDOLL          = $Diablo3->getPaperDoll('barbarian', 'female');                                      // Class, Gender
 
 // Before handling the data check to make sure the return is an array
 //
@@ -57,6 +58,7 @@ if(is_array($ARTISAN_DATA)) {
 
 // Item & skill image
 //
+echo '<img src="'.$PAPERDOLL.'">';
 echo '<img src="'.$ITEM_IMAGE.'">';
 echo '<img src="'.$SKILL_IMAGE.'">';
 

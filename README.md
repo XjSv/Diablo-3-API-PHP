@@ -36,3 +36,5 @@ Image folder needs to be in the following structure:
 ### Get Skill Image
 ### Get Skill Tooltip
 ### Get Skill Rune Tooltip
+
+### Get Paperdoll
