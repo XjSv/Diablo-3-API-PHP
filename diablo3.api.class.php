@@ -143,8 +143,9 @@ class Diablo3 {
                 curl_setopt($curl, CURLOPT_URL,            $url);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($curl, CURLOPT_FILE,           $fp);
-                curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
-                curl_setopt($curl, CURLOPT_TIMEOUT,        20);
+                curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
+                curl_setopt($curl, CURLOPT_TIMEOUT,        60);
+                curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
                 curl_setopt($curl, CURLOPT_MAXREDIRS,      3);
                 curl_setopt($curl, CURLOPT_HEADER,         false);
                 curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
@@ -197,17 +198,19 @@ class Diablo3 {
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL,            $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($curl, CURLOPT_TIMEOUT,        20);
-        curl_setopt($curl, CURLOPT_MAXREDIRS,      3);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
+        curl_setopt($curl, CURLOPT_TIMEOUT,        60);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
         curl_setopt($curl, CURLOPT_HEADER,         false);
         curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
 
-        $data  = curl_exec($curl);
-        $error = curl_errno($curl);
+        $data       = curl_exec($curl);
+        $error_no   = curl_errno($curl);
+        $curl_error = curl_error($curl);
 
-        if($error) {
-            error_log('cURL Error: '.$error);
+        if($error_no) {
+            error_log('cURL Error: '.$error_no.' ('.$curl_error.') URL: '.$url);
             $data = false;
         } else {
             $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
