@@ -28,15 +28,16 @@ class Diablo3 {
     private $item_img_sizes      = array('small', 'large');
     private $skill_img_url;
     private $skill_img_sizes     = array('21', '42', '64');
-    private $item_save_loc       = '/diablo/img/items/';   // Relative to DOCUMENT_ROOT
-    private $skills_save_loc     = '/diablo/img/skills/';  // Relative to DOCUMENT_ROOT
-    private $paperdolls_save_loc = '/diablo/img/paperdolls/';  // Relative to DOCUMENT_ROOT
+    private $item_save_loc       = '/Diablo-3-API-PHP/img/items/';   // Relative to DOCUMENT_ROOT
+    private $skills_save_loc     = '/Diablo-3-API-PHP/img/skills/';  // Relative to DOCUMENT_ROOT
+    private $paperdolls_save_loc = '/Diablo-3-API-PHP/img/paperdolls/';  // Relative to DOCUMENT_ROOT
     private $skill_url;
     private $paperdoll_url;
     private $genders             = array('male', 'female');
     private $classes             = array('barbarian', 'witch-doctor', 'demon-hunter', 'monk', 'wizard');
 
     public function __construct($battlenet_tag, $server = 'us', $locale = 'en_US') {
+
         if($battlenet_tag !== '') {
             $hash = strpos($battlenet_tag, '#');
             if($hash !== false) {
@@ -55,12 +56,12 @@ class Diablo3 {
                 $locale = 'en_US';
             }
 
-            //  Check if its a valid Battle.net tag (Pending)
+            //  Check if its a valid Battle.net tag (Testing)
             //
-            /*if(!preg_match('/^.+(-[0-9]{4})/', $battlenet_tag)) {
+            if ( $this->checkBattletag($battlenet_tag) === false ) {
                 error_log("Battle.net tag provided not valid.");
                 exit(0);
-            }*/
+            }
 
             //  Set Variables
             //
@@ -426,6 +427,20 @@ class Diablo3 {
         } else {
             return 'No Data Return';
         }
+    }
+
+    /**
+     * checkBattletag
+     * Checks if the battle tag meets the requirements
+     * https://us.battle.net/support/en/article/battletag-naming-policy
+     * 
+     * @param  string $battlenet_tag [description]
+     * @return boolean               [description]
+     */
+    public function checkBattletag($battlenet_tag)
+    {
+        $pattern = '/^[a-zA-Z0-9ÀÁÅÃÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]{3,12}-[0-9]{4}$/';
+        return ( preg_match($pattern, $battlenet_tag) ) ? true : false;
     }
 
     public function __desctruct() {
