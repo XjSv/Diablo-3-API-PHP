@@ -28,16 +28,15 @@ class Diablo3 {
     private $item_img_sizes      = array('small', 'large');
     private $skill_img_url;
     private $skill_img_sizes     = array('21', '42', '64');
-    private $item_save_loc       = '/Diablo-3-API-PHP/img/items/';   // Relative to DOCUMENT_ROOT
-    private $skills_save_loc     = '/Diablo-3-API-PHP/img/skills/';  // Relative to DOCUMENT_ROOT
-    private $paperdolls_save_loc = '/Diablo-3-API-PHP/img/paperdolls/';  // Relative to DOCUMENT_ROOT
+    private $item_save_loc       = '/diablo/img/items/';       // Relative to DOCUMENT_ROOT
+    private $skills_save_loc     = '/diablo/img/skills/';      // Relative to DOCUMENT_ROOT
+    private $paperdolls_save_loc = '/diablo/img/paperdolls/';  // Relative to DOCUMENT_ROOT
     private $skill_url;
     private $paperdoll_url;
     private $genders             = array('male', 'female');
     private $classes             = array('barbarian', 'witch-doctor', 'demon-hunter', 'monk', 'wizard');
 
     public function __construct($battlenet_tag, $server = 'us', $locale = 'en_US') {
-
         if($battlenet_tag !== '') {
             $hash = strpos($battlenet_tag, '#');
             if($hash !== false) {
@@ -56,9 +55,9 @@ class Diablo3 {
                 $locale = 'en_US';
             }
 
-            //  Check if its a valid Battle.net tag (Testing)
+            // Check if its a valid Battle.net tag
             //
-            if ( $this->checkBattletag($battlenet_tag) === false ) {
+            if(!$this->checkBattletag($battlenet_tag)) {
                 error_log("Battle.net tag provided not valid.");
                 exit(0);
             }
@@ -83,6 +82,19 @@ class Diablo3 {
         $this->skill_img_url = 'http://'.$server.$this->media_host.'/d3/icons/skills/';
         $this->skill_url     = 'http://'.$server.$this->host.'/d3/'.substr($locale, 0, -3).'/tooltip/';
         $this->paperdoll_url = 'http://'.$server.$this->host.'/d3/static/images/profile/hero/paperdoll/';
+    }
+
+    /**
+     * checkBattletag
+     * Checks if the battle tag meets the requirements
+     * https://us.battle.net/support/en/article/battletag-naming-policy
+     *
+     * @param  string $battlenet_tag [description]
+     * @return boolean               [description]
+     */
+    public function checkBattletag($battlenet_tag) {
+        $pattern = '/^[a-zA-Z0-9ÀÁÅÃÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]{3,12}-[0-9]{4}$/';
+        return (preg_match($pattern, $battlenet_tag)) ? true : false;
     }
 
     /**
@@ -113,23 +125,27 @@ class Diablo3 {
     private function curlSaveImage($location, $url, $icon, $size = '') {
         if(empty($location) || empty($url) || empty($icon)) return false;
 
-        if($location == 'items') {
-            $real_item_path  = $_SERVER['DOCUMENT_ROOT'].$this->item_save_loc;
-            $return_location = $this->item_save_loc;
-            $size            = $size.'/';
-            $ext             = '.png';
-        } else if($location == 'skills') {
-            $real_item_path  = $_SERVER['DOCUMENT_ROOT'].$this->skills_save_loc;
-            $return_location = $this->skills_save_loc;
-            $size            = $size.'/';
-            $ext             = '.png';
-        } else if($location == 'paperdolls') {
-            $real_item_path  = $_SERVER['DOCUMENT_ROOT'].$this->paperdolls_save_loc;
-            $return_location = $this->paperdolls_save_loc;
-            $size            = '';
-            $ext             = '.jpg';
-        } else {
-            return false;
+        switch($location) {
+            case 'items':
+                $real_item_path  = $_SERVER['DOCUMENT_ROOT'].$this->item_save_loc;
+                $return_location = $this->item_save_loc;
+                $size            = $size.'/';
+                $ext             = '.png';
+                break;
+            case 'skills':
+                $real_item_path  = $_SERVER['DOCUMENT_ROOT'].$this->skills_save_loc;
+                $return_location = $this->skills_save_loc;
+                $size            = $size.'/';
+                $ext             = '.png';
+                break;
+            case 'paperdolls':
+                $real_item_path  = $_SERVER['DOCUMENT_ROOT'].$this->paperdolls_save_loc;
+                $return_location = $this->paperdolls_save_loc;
+                $size            = '';
+                $ext             = '.jpg';
+                break;
+            default:
+                return false;
         }
 
         if(!file_exists($real_item_path.$size.$icon.$ext)) {
@@ -427,20 +443,6 @@ class Diablo3 {
         } else {
             return 'No Data Return';
         }
-    }
-
-    /**
-     * checkBattletag
-     * Checks if the battle tag meets the requirements
-     * https://us.battle.net/support/en/article/battletag-naming-policy
-     * 
-     * @param  string $battlenet_tag [description]
-     * @return boolean               [description]
-     */
-    public function checkBattletag($battlenet_tag)
-    {
-        $pattern = '/^[a-zA-Z0-9ÀÁÅÃÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]{3,12}-[0-9]{4}$/';
-        return ( preg_match($pattern, $battlenet_tag) ) ? true : false;
     }
 
     public function __desctruct() {
