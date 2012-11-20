@@ -13,13 +13,13 @@ Original API Documentation: http://blizzard.github.com/d3-api-docs/
 Notes: 
 Image folder needs to be in the following structure: 
 - - -
-- img 
-  - items
-    - large
-    - small
-  - skills
-    - 21
-    - 42
+- img  
+  - items  
+    - large  
+    - small  
+  - skills  
+    - 21  
+    - 42  
     - 64  
 
 - - -
@@ -38,3 +38,5 @@ Image folder needs to be in the following structure:
 ### Get Skill Rune Tooltip
 
 ### Get Paperdoll
+
+Supports authenticated API Calls.

@@ -19,6 +19,7 @@ class Diablo3 {
     private $artisanTypes        = array('blacksmith', 'jeweler');
     private $blizzardErrors      = array('OOPS', 'LIMITED', 'MAINTENANCE', 'NOTFOUND');
     private $current_locale;
+    private $current_server;
     private $career_url;
     private $hero_url;
     private $item_url;
@@ -28,13 +29,17 @@ class Diablo3 {
     private $item_img_sizes      = array('small', 'large');
     private $skill_img_url;
     private $skill_img_sizes     = array('21', '42', '64');
-    private $item_save_loc       = '/diablo/img/items/';       // Relative to DOCUMENT_ROOT
-    private $skills_save_loc     = '/diablo/img/skills/';      // Relative to DOCUMENT_ROOT
-    private $paperdolls_save_loc = '/diablo/img/paperdolls/';  // Relative to DOCUMENT_ROOT
+    private $item_save_loc       = '/d3_stats_git/img/items/';       // Relative to DOCUMENT_ROOT
+    private $skills_save_loc     = '/d3_stats_git/img/skills/';      // Relative to DOCUMENT_ROOT
+    private $paperdolls_save_loc = '/d3_stats_git/img/paperdolls/';  // Relative to DOCUMENT_ROOT
     private $skill_url;
     private $paperdoll_url;
     private $genders             = array('male', 'female');
     private $classes             = array('barbarian', 'witch-doctor', 'demon-hunter', 'monk', 'wizard');
+    private $authenticate        = false;                // Set to true for authenticated calls
+    private $API_private_key     = BLIZZARD_PRIVATE_KEY; // API Private Key
+    private $API_public_key      = BLIZZARD_PUBLIC_KEY;  // API Public Key
+    private $last_time_accessed  = 0;
 
     public function __construct($battlenet_tag, $server = 'us', $locale = 'en_US') {
         if($battlenet_tag !== '') {
@@ -58,13 +63,14 @@ class Diablo3 {
             // Check if its a valid Battle.net tag
             //
             if(!$this->checkBattletag($battlenet_tag)) {
-                error_log("Battle.net tag provided not valid.");
+                error_log("Battle.net tag provided not valid. ({$battlenet_tag})");
                 exit(0);
             }
 
             //  Set Variables
             //
             $this->current_locale = $locale;
+            $this->current_server = $server;
             $this->battlenet_tag  = urlencode($battlenet_tag);
             $this->career_url     = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/index';
             $this->hero_url       = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
@@ -93,8 +99,10 @@ class Diablo3 {
      * @return boolean               [description]
      */
     public function checkBattletag($battlenet_tag) {
-        $pattern = '/^[a-zA-Z0-9ÀÁÅÃÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]{3,12}-[0-9]{4}$/';
-        return (preg_match($pattern, $battlenet_tag)) ? true : false;
+        /*$pattern = '/^[a-zA-Z0-9ÀÁÅÃÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]{3,12}-[0-9]{4}$/';
+        return (preg_match($pattern, $battlenet_tag)) ? true : false;*/
+
+        return true; // Temp @Todo: Fix This
     }
 
     /**
@@ -158,12 +166,13 @@ class Diablo3 {
                 $fp   = fopen($real_item_path.$size.$icon.$ext, 'wb');
                 $curl = curl_init();
                 curl_setopt($curl, CURLOPT_URL,            $url);
+                curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($curl, CURLOPT_FILE,           $fp);
-                curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
-                curl_setopt($curl, CURLOPT_TIMEOUT,        60);
+                curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 20);
+                curl_setopt($curl, CURLOPT_TIMEOUT,        10);
                 curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-                curl_setopt($curl, CURLOPT_MAXREDIRS,      3);
+                curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
                 curl_setopt($curl, CURLOPT_HEADER,         false);
                 curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
 
@@ -214,13 +223,38 @@ class Diablo3 {
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL,            $url);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
-        curl_setopt($curl, CURLOPT_TIMEOUT,        60);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 20);
+        curl_setopt($curl, CURLOPT_TIMEOUT,        10);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
         curl_setopt($curl, CURLOPT_HEADER,         false);
         curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
+
+        // Check last accessed time
+        //
+        if($this->last_time_accessed > 0) {
+            $last_time_accessed = $this->last_time_accessed / 1000;
+            curl_setopt($ch, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+            curl_setopt($ch, CURLOPT_TIMEVALUE, $last_time_accessed);
+        }
+
+        // Authenticate with Battle.net
+        //
+        if($this->authenticate) {
+            date_default_timezone_set('GMT');
+            $request_url = str_replace('http://'.$this->current_server.$this->host, '', $url);
+            $date        = date('D, d M Y G:i:s T', time());
+            $signature   = base64_encode(hash_hmac('sha1', "GET\n".$date."\n".$request_url."\n", $this->API_private_key, true));
+
+            $header = array("Host: ".$this->current_server.$this->host,
+                            "Date: ". $date,
+                            "\nAuthorization: BNET ".$this->API_public_key.":".$signature."\n");
+
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
+        }
 
         $data       = curl_exec($curl);
         $error_no   = curl_errno($curl);
@@ -233,10 +267,12 @@ class Diablo3 {
             $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
             if($http_status >= 400 && $http_status <= 599) {
+                error_log('Error Data Return: '.$data);
                 $data = false;
             } else if($http_status >= 200 && $http_status <= 399) {
                 // HTTP status good
             } else {
+                error_log('Error Data Return: '.$data);
                 $data = false;
             }
         }
@@ -244,6 +280,19 @@ class Diablo3 {
         curl_close($curl);
 
         return $data;
+    }
+
+    /**
+     * setLastTimeAccessed
+     * Checks to see if required cURL functions are available
+     *
+     * Parameters:
+     *     (date) - date time
+     */
+    public function setLastTimeAccessed($date = 0) {
+        $this->last_time_accessed = $date;
+
+        return true;
     }
 
     /**
