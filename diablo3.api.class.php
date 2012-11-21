@@ -29,16 +29,16 @@ class Diablo3 {
     private $item_img_sizes      = array('small', 'large');
     private $skill_img_url;
     private $skill_img_sizes     = array('21', '42', '64');
-    private $item_save_loc       = '/d3_stats_git/img/items/';       // Relative to DOCUMENT_ROOT
-    private $skills_save_loc     = '/d3_stats_git/img/skills/';      // Relative to DOCUMENT_ROOT
-    private $paperdolls_save_loc = '/d3_stats_git/img/paperdolls/';  // Relative to DOCUMENT_ROOT
+    private $item_save_loc       = '/img/items/';       // Relative to DOCUMENT_ROOT
+    private $skills_save_loc     = '/img/skills/';      // Relative to DOCUMENT_ROOT
+    private $paperdolls_save_loc = '/img/paperdolls/';  // Relative to DOCUMENT_ROOT
     private $skill_url;
     private $paperdoll_url;
     private $genders             = array('male', 'female');
     private $classes             = array('barbarian', 'witch-doctor', 'demon-hunter', 'monk', 'wizard');
     private $authenticate        = false;                // Set to true for authenticated calls
-    private $API_private_key     = BLIZZARD_PRIVATE_KEY; // API Private Key
-    private $API_public_key      = BLIZZARD_PUBLIC_KEY;  // API Public Key
+    private $API_private_key     = '';  // API Private Key
+    private $API_public_key      = '';  // API Public Key
     private $last_time_accessed  = 0;
 
     public function __construct($battlenet_tag, $server = 'us', $locale = 'en_US') {
@@ -166,11 +166,12 @@ class Diablo3 {
                 $fp   = fopen($real_item_path.$size.$icon.$ext, 'wb');
                 $curl = curl_init();
                 curl_setopt($curl, CURLOPT_URL,            $url);
-                curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($curl, CURLOPT_URL,            $url);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 20);
-                curl_setopt($curl, CURLOPT_TIMEOUT,        10);
+                curl_setopt($curl, CURLOPT_BINARYTRANSFER, true);
+                curl_setopt($curl, CURLOPT_FILE,           $fp);
+                curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
+                curl_setopt($curl, CURLOPT_TIMEOUT,        20);
                 curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
                 curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
                 curl_setopt($curl, CURLOPT_HEADER,         false);
