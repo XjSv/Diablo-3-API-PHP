@@ -166,17 +166,18 @@ class Diablo3 {
                 $fp   = fopen($real_item_path.$size.$icon.$ext, 'wb');
                 $curl = curl_init();
                 curl_setopt($curl, CURLOPT_URL,            $url);
+                curl_setopt($curl, CURLOPT_URL,            $url);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($curl, CURLOPT_BINARYTRANSFER, true);
                 curl_setopt($curl, CURLOPT_FILE,           $fp);
-                curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
                 curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
                 curl_setopt($curl, CURLOPT_TIMEOUT,        20);
-                curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-                curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
                 curl_setopt($curl, CURLOPT_HEADER,         false);
                 curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
+                if(ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) {
+                    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+                    curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
+                }
 
                 curl_exec($curl);
                 $error = curl_errno($curl);
@@ -230,10 +231,12 @@ class Diablo3 {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 20);
         curl_setopt($curl, CURLOPT_TIMEOUT,        10);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
         curl_setopt($curl, CURLOPT_HEADER,         false);
         curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
+        if(ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) {
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
+        }
 
         // Check last accessed time
         //
