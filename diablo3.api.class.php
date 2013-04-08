@@ -14,7 +14,7 @@ class Diablo3 {
     private $host                = '.battle.net';
     private $media_host          = '.media.blizzard.com';
     private $battlenet_servers   = array('us', 'eu', 'tw', 'kr', 'cn');
-    private $locales             = array('en_US', 'es_MX', 'en_GB', 'it_IT', 'es_ES', 'pt_PT', 'fr_FR', 'ru_RU', 'pl_PL', 'de_DE', 'ko_KR', 'en_US', 'zh_TW', 'en_US', 'zh_CN', 'en_US');
+    private $locales             = array('en_US', 'en_GB', 'es_MX', 'es_ES', 'it_IT', 'pt_PT', 'pt_BR', 'fr_FR', 'ru_RU', 'pl_PL', 'de_DE', 'ko_KR', 'zh_TW', 'zh_CN');
     private $followerTypes       = array('enchantress', 'templar', 'scoundrel');
     private $artisanTypes        = array('blacksmith', 'jeweler');
     private $blizzardErrors      = array('OOPS', 'LIMITED', 'MAINTENANCE', 'NOTFOUND');
@@ -36,13 +36,30 @@ class Diablo3 {
     private $paperdoll_url;
     private $genders             = array('male', 'female');
     private $classes             = array('barbarian', 'witch-doctor', 'demon-hunter', 'monk', 'wizard');
-    private $authenticate        = false;                // Set to true for authenticated calls
-    private $API_private_key     = '';  // API Private Key
-    private $API_public_key      = '';  // API Public Key
+    private $authenticate        = AUTHENTICATION;       // Set to true for authenticated calls
+    private $API_private_key     = BLIZZARD_PRIVATE_KEY; // API Private Key
+    private $API_public_key      = BLIZZARD_PUBLIC_KEY;  // API Public Key
     private $last_time_accessed  = 0;
 
     public function __construct($battlenet_tag, $server = 'us', $locale = 'en_US') {
         if(!empty($battlenet_tag)) {
+            $hash = strpos($battlenet_tag, '#');
+            if($hash !== false) {
+                $battlenet_tag = str_replace('#', '-', $battlenet_tag);
+            }
+
+            if(!in_array($server, $this->battlenet_servers, true)) {
+                $server = 'us';
+            } else if($server == 'cn') {
+                $server = '';
+                $this->host = 'www.battlenet.com.cn'; // 'cn.battle.net'
+                $this->media_host = 'content.battlenet.com.cn'; // 'cn.media.blizzard.com'
+            }
+
+            if(!in_array($locale, $this->locales, true)) {
+                $locale = 'en_US';
+            }
+
             // Check if its a valid Battle.net tag
             //
             if(!$this->checkBattletag($battlenet_tag)) {
@@ -50,27 +67,13 @@ class Diablo3 {
                 exit(0);
             }
 
-            $battlenet_tag = str_replace('#', '-', $battlenet_tag);
-
-            if(!in_array($server, $this->battlenet_servers, true)) {
-                $server = 'us';
-            } else if($server == 'cn') {
-                $server           = '';
-                $this->host       = 'www.battlenet.com.cn';     // 'cn.battle.net' does not exist
-                $this->media_host = 'content.battlenet.com.cn'; // 'cn.media.blizzard.com' does not exist
-            }
-
-            if(!in_array($locale, $this->locales, true)) {
-                $locale = 'en_US';
-            }
-
-            //  Set Variables
+            // Set Variables
             //
             $this->current_locale = $locale;
             $this->current_server = $server;
-            $this->battlenet_tag  = urlencode($battlenet_tag);
-            $this->career_url     = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/index';
-            $this->hero_url       = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
+            $this->battlenet_tag = urlencode($battlenet_tag);
+            $this->career_url = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/index';
+            $this->hero_url = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
         } else {
             error_log("Required Battle.net tag");
             exit(0);
@@ -96,7 +99,7 @@ class Diablo3 {
      * @return boolean               [description]
      */
     public function checkBattletag($battlenet_tag) {
-        $pattern = '/^[\p{L}\p{Mn}][\p{L}\p{Mn}0-9]{2,11}#[0-9]{4,5}+$/u';
+        $pattern = '/^[\p{L}\p{Mn}][\p{L}\p{Mn}0-9]{2,11}-[0-9]{4,5}+$/u';
         return (preg_match($pattern, $battlenet_tag)) ? true : false;
     }
 
@@ -161,18 +164,17 @@ class Diablo3 {
                 $fp   = fopen($real_item_path.$size.$icon.$ext, 'wb');
                 $curl = curl_init();
                 curl_setopt($curl, CURLOPT_URL,            $url);
-                curl_setopt($curl, CURLOPT_URL,            $url);
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($curl, CURLOPT_BINARYTRANSFER, true);
                 curl_setopt($curl, CURLOPT_FILE,           $fp);
+                curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
                 curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
                 curl_setopt($curl, CURLOPT_TIMEOUT,        20);
+                curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+                curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
                 curl_setopt($curl, CURLOPT_HEADER,         false);
                 curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
-                if(ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) {
-                    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-                    curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
-                }
 
                 curl_exec($curl);
                 $error = curl_errno($curl);
@@ -226,12 +228,10 @@ class Diablo3 {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 20);
         curl_setopt($curl, CURLOPT_TIMEOUT,        10);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
         curl_setopt($curl, CURLOPT_HEADER,         false);
         curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
-        if(ini_get('open_basedir') == '' && ini_get('safe_mode' == 'Off')) {
-            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
-        }
 
         // Check last accessed time
         //
@@ -310,7 +310,7 @@ class Diablo3 {
         if($data) $data = json_decode($data, true);
 
         if(isset($data['code']) && (in_array($data['code'], $this->blizzardErrors, true))) {
-            error_log('API Fail Reason: '.$data['reason']);
+            error_log('API Fail Reason: '.$data['reason'].' URL: '.$url);
             $data = false;
         }
 
