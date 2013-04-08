@@ -42,29 +42,26 @@ class Diablo3 {
     private $last_time_accessed  = 0;
 
     public function __construct($battlenet_tag, $server = 'us', $locale = 'en_US') {
-        if($battlenet_tag !== '') {
-            $hash = strpos($battlenet_tag, '#');
-            if($hash !== false) {
-                $battlenet_tag = str_replace('#', '-', $battlenet_tag);
-            }
-
-            if(!in_array($server, $this->battlenet_servers, true)) {
-                $server = 'us';
-            } else if($server == 'cn') {
-                $server           = '';
-                $this->host       = 'www.battlenet.com.cn';     // 'cn.battle.net'
-                $this->media_host = 'content.battlenet.com.cn'; // 'cn.media.blizzard.com'
-            }
-
-            if(!in_array($locale, $this->locales, true)) {
-                $locale = 'en_US';
-            }
-
+        if(!empty($battlenet_tag)) {
             // Check if its a valid Battle.net tag
             //
             if(!$this->checkBattletag($battlenet_tag)) {
                 error_log("Battle.net tag provided not valid. ({$battlenet_tag})");
                 exit(0);
+            }
+
+            $battlenet_tag = str_replace('#', '-', $battlenet_tag);
+
+            if(!in_array($server, $this->battlenet_servers, true)) {
+                $server = 'us';
+            } else if($server == 'cn') {
+                $server           = '';
+                $this->host       = 'www.battlenet.com.cn';     // 'cn.battle.net' does not exist
+                $this->media_host = 'content.battlenet.com.cn'; // 'cn.media.blizzard.com' does not exist
+            }
+
+            if(!in_array($locale, $this->locales, true)) {
+                $locale = 'en_US';
             }
 
             //  Set Variables
