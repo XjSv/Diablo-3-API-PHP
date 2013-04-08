@@ -99,10 +99,8 @@ class Diablo3 {
      * @return boolean               [description]
      */
     public function checkBattletag($battlenet_tag) {
-        /*$pattern = '/^[a-zA-Z0-9ÀÁÅÃÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]{3,12}-[0-9]{4}$/';
-        return (preg_match($pattern, $battlenet_tag)) ? true : false;*/
-
-        return true; // Temp @Todo: Fix This
+        $pattern = '/^[\p{L}\p{Mn}][\p{L}\p{Mn}0-9]{2,11}#[0-9]{4,5}+$/u';
+        return (preg_match($pattern, $battlenet_tag)) ? true : false;
     }
 
     /**
