@@ -1,6 +1,4 @@
 # Diablo 3 API PHP
-================
-
 Diablo 3 Web API PHP Bridge
 
 This is meant to be very simple & easy to use.  
