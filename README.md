@@ -22,19 +22,19 @@ Image folder needs to be in the following structure:
 
 - - -
 
-## Methods Available
+### Methods Available
 
-### Get Career Profile
-### Get Hero Profile
-### Get Item Information
-### Get Follower Information
-### Get Artisan Information        
+#### Get Career Profile
+#### Get Hero Profile
+#### Get Item Information
+#### Get Follower Information
+#### Get Artisan Information        
 
-### Get Item Image
-### Get Skill Image
-### Get Skill Tooltip
-### Get Skill Rune Tooltip
+#### Get Item Image
+#### Get Skill Image
+#### Get Skill Tooltip
+#### Get Skill Rune Tooltip
 
-### Get Paperdoll
+#### Get Paperdoll
 
-Supports authenticated API Calls.
+Supports authenticated API calls.
