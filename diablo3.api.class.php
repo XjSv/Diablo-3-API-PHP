@@ -71,9 +71,9 @@ class Diablo3 {
             //
             $this->current_locale = $locale;
             $this->current_server = $server;
-            $this->battlenet_tag = urlencode($battlenet_tag);
-            $this->career_url = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/index';
-            $this->hero_url = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
+            $this->battlenet_tag  = urlencode($battlenet_tag);
+            $this->career_url     = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/index';
+            $this->hero_url       = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
         } else {
             error_log("Required Battle.net tag");
             exit(0);
@@ -99,8 +99,9 @@ class Diablo3 {
      * @return boolean               [description]
      */
     public function checkBattletag($battlenet_tag) {
-        $pattern = '/^[\p{L}\p{Mn}][\p{L}\p{Mn}0-9]{2,11}-[0-9]{4,5}+$/u';
-        return (preg_match($pattern, $battlenet_tag)) ? true : false;
+        /*$pattern = '/^[\p{L}\p{Mn}][\p{L}\p{Mn}0-9]{2,11}-[0-9]{4,5}+$/u';
+        return (preg_match($pattern, $battlenet_tag)) ? true : false;*/
+        return true;
     }
 
     /**
