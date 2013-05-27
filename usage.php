@@ -16,6 +16,7 @@ $Diablo3            = new Diablo3("XjSv#1677", 'us', 'en_US');                  
 $CAREER_DATA        = $Diablo3->getCareer();
 //$HERO_DATA          = $Diablo3->getHero(3982160);                                                         // Hero ID (int)
 //$ITEM_DATA          = $Diablo3->getItem('item/COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD'); // Item Data 'item/COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD'  (string)
+//$ITEM_INFO_DATA     = $Diablo3->getItemById('Unique_Helm_006_104');                                       // Item ID 'getItemById'  (string)
 //$FOLLOWER_DATA      = $Diablo3->getFollower('templar');                                                   // Options: 'enchantress', 'templar', 'scoundrel' (string)
 //$ARTISAN_DATA       = $Diablo3->getArtisan('blacksmith');                                                 // Options: 'blacksmith', 'jeweler' (string)
 //$ITEM_IMAGE         = $Diablo3->getItemImage('unique_chest_013_104_demonhunter_male', 'large');           // Icon Name, Size: Options: 'small', 'large' (string)
@@ -45,6 +46,13 @@ if(is_array($ITEM_DATA)) {
     print_r($ITEM_DATA);
 } else {
     echo $ITEM_DATA; // Error message
+}
+
+echo "<br>Item Info Data: <br>";
+if(is_array($ITEM_INFO_DATA)) {
+    print_r($ITEM_INFO_DATA);
+} else {
+    echo $ITEM_INFO_DATA; // Error message
 }
 
 echo "<br>Follower Data: <br>";
