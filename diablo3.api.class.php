@@ -37,8 +37,8 @@ class Diablo3 {
     private $genders             = array('male', 'female');
     private $classes             = array('barbarian', 'witch-doctor', 'demon-hunter', 'monk', 'wizard');
     private $authenticate        = false;       // Set to true for authenticated calls
-    private $API_private_key     = '';          // API Private Key
-    private $API_public_key      = '';          // API Public Key
+    private $API_private_key     = 'BLIZZARD_PRIVATE_KEY'; // API Private Key
+    private $API_public_key      = 'BLIZZARD_PUBLIC_KEY';  // API Public Key
     private $last_time_accessed  = 0;
 
     public function __construct($battlenet_tag, $server = 'us', $locale = 'en_US') {
@@ -101,7 +101,6 @@ class Diablo3 {
     public function checkBattletag($battlenet_tag) {
         $pattern = '/^[\p{L}\p{Mn}][\p{L}\p{Mn}0-9]{2,11}-[0-9]{4,5}+$/u';
         return (preg_match($pattern, $battlenet_tag)) ? true : false;
-        return true;
     }
 
     /**
@@ -175,6 +174,7 @@ class Diablo3 {
                 curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
                 curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
                 curl_setopt($curl, CURLOPT_HEADER,         false);
+                curl_setopt($curl, CURLOPT_FRESH_CONNECT,  true);
                 curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
 
                 curl_exec($curl);
@@ -216,7 +216,7 @@ class Diablo3 {
      *     (url) - a valid URL
      */
     private function curlRequest($url) {
-        if($url == '') return false;
+        if(empty($url)) return false;
         if(!$this->cURLcheckBasics()) {
             error_log("cURL is NOT Available");
             return false;
@@ -232,6 +232,7 @@ class Diablo3 {
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
         curl_setopt($curl, CURLOPT_HEADER,         false);
+        curl_setopt($curl, CURLOPT_FRESH_CONNECT,  true);
         curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
 
         // Check last accessed time
@@ -239,7 +240,7 @@ class Diablo3 {
         if($this->last_time_accessed > 0) {
             $last_time_accessed = $this->last_time_accessed / 1000;
             curl_setopt($ch, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
-            curl_setopt($ch, CURLOPT_TIMEVALUE, $last_time_accessed);
+            curl_setopt($ch, CURLOPT_TIMEVALUE,     $last_time_accessed);
         }
 
         // Authenticate with Battle.net
@@ -304,7 +305,7 @@ class Diablo3 {
      *     (name) - about this param
      */
     private function getJsonData($url) {
-        if($url == '') return false;
+        if(empty($url)) return false;
 
         $data = $this->curlRequest($url);
 
@@ -317,27 +318,29 @@ class Diablo3 {
 
         return $data;
     }
-    
-    /**
+
+     /**
      * getAllItemImages
      * Gets all the item images from a hero ID. If no size is passed both will be processed
-     * 
+     *
      * @param  int    $heroId [description]
      * @param  string $size    [description]
-     * 
+     *
      */
-    public function getAllItemImages($heroId, $size = '') {
-        if(empty($heroId)) return 'Hero ID Empty';
-        
-        $hero_data = $this->getHero($heroeID);
+    public function getAllHeroItemImages($hero_id = null, $size = '') {
+        if(empty($hero_id) || !preg_match('/^[0-9]+$/', $hero_id)) return 'Invalid/Empty Hero Id';
+
+        $hero_data = $this->getHero($hero_id);
         if(is_array($hero_data)) {
             foreach($hero_data['items'] as $key) {
                 if(empty($size)) {
-                    $item_image_small = $this->getItemImage($key['icon'], 'small');
-                    $item_image_large = $this->getItemImage($key['icon'], 'large');
+                    $this->getItemImage($key['icon'], 'small');
+                    $this->getItemImage($key['icon'], 'large');
                 } else {
-                    $item_image = $this->getItemImage($key['icon'], $size);
-                }   
+                    if(in_array($size, $this->item_img_sizes, true)) {
+                        $this->getItemImage($key['icon'], $size);
+                    }
+                }
             }
         } else {
             return 'No Data Return';
@@ -353,7 +356,7 @@ class Diablo3 {
      *     (imageSize) - Size of image (small or large)
      */
     public function getItemImage($icon = null, $imageSize = 'small') {
-        if($icon == null || !in_array($imageSize, $this->item_img_sizes, true)) return 'Icon Name Empty or Invalid Size';
+        if(empty($icon) || !in_array($imageSize, $this->item_img_sizes, true)) return 'Icon Name Empty or Invalid Size';
 
         $data = $this->curlSaveImage('items', $this->item_img_url.$imageSize.'/'.$icon.'.png', $icon, $imageSize);
 
@@ -364,40 +367,40 @@ class Diablo3 {
         }
     }
 
-/**
+    /**
      * getAllSkillImages
      * Get all the skill images from a heroe ID
-     * 
+     *
      * @param  int    $heroId  The heroe id
      * @param  string $size    The size : 64, 42, 21
      * @return string          Error message if no valid size is sent
-     * 
+     *
      */
-    public function getAllSkillImages($heroId, $size = '') {
-        if(empty($heroId)) return 'Hero ID Empty';
-        
-        $hero_data = $this->getHero($heroId);
+    public function getAllHeroSkillImages($hero_id = null, $size = '') {
+        if(empty($hero_id) || !preg_match('/^[0-9]+$/', $hero_id)) return 'Invalid/Empty Hero Id';
+
+        $hero_data = $this->getHero($hero_id);
 
         if(is_array($hero_data)) {
             foreach($hero_data['skills']['active'] as $skills) {
                 if(isset($skills['skill']['icon'])) {
-                    $skillname = $skills['skill']['icon'];
-                    
+                    $skill_name = $skills['skill']['icon'];
+
                     // Checking the size
                     switch($size) {
                         case '64':
-                            $this->getSkillImage($skillname, '64');
+                            $this->getSkillImage($skill_name, '64');
                             break;
                         case '41':
-                            $this->getSkillImage($skillname, '42');
+                            $this->getSkillImage($skill_name, '42');
                             break;
                         case '21':
-                            $this->getSkillImage($skillname, '21');
+                            $this->getSkillImage($skill_name, '21');
                             break;
                         case '':
-                            $this->getSkillImage($skillname, '64');
-                            $this->getSkillImage($skillname, '42');
-                            $this->getSkillImage($skillname, '21');
+                            $this->getSkillImage($skill_name, '64');
+                            $this->getSkillImage($skill_name, '42');
+                            $this->getSkillImage($skill_name, '21');
                             break;
                         default:
                             error_log("Not a correct image size. Choose between 64, 42 or 21.");
@@ -410,7 +413,7 @@ class Diablo3 {
             return 'No Data Return';
         }
     }
-    
+
     /**
      * getSkillImage
      * Gets skill image
@@ -420,7 +423,7 @@ class Diablo3 {
      *     (imageSize) - Size of image (21, 42 or 64)
      */
     public function getSkillImage($icon = null, $imageSize = '21') {
-        if($icon == null || !in_array($imageSize, $this->skill_img_sizes, true)) return 'Icon Name Empty or Invalid Size';
+        if(empty($icon) || !in_array($imageSize, $this->skill_img_sizes, true)) return 'Icon Name Empty or Invalid Size';
 
         $data = $this->curlSaveImage('skills', $this->skill_img_url.$imageSize.'/'.$icon.'.png', $icon, $imageSize);
 
@@ -440,7 +443,7 @@ class Diablo3 {
      *     (jsonp)      - True to return in jsonp format (boolean)
      */
     public function getSkillToolTip($tooltipUrl = null, $jsonp = false) {
-        if($tooltipUrl == null) return 'Tooltip Url Empty';
+        if(empty($tooltipUrl)) return 'Tooltip Url Empty';
 
         $jsonp_ext = '';
         if($jsonp) {
@@ -465,7 +468,7 @@ class Diablo3 {
      *     (gender) - Gender (male or female)
      */
     public function getPaperDoll($class = null, $gender = 'male') {
-        if($class == null || !in_array($class, $this->classes, true) || !in_array($gender, $this->genders, true)) return 'No/Wrong class provided or wrong gender type.';
+        if(empty($class) || !in_array($class, $this->classes, true) || !in_array($gender, $this->genders, true)) return 'No/Wrong class provided or wrong gender type.';
 
         $data = $this->curlSaveImage('paperdolls', $this->paperdoll_url.$class.'-'.$gender.'.jpg', $class.'-'.$gender);
 
@@ -499,7 +502,7 @@ class Diablo3 {
      *     (hero_id) - Hero ID (integer)
      */
     public function getHero($hero_id = null) {
-        if($hero_id == null || !preg_match('/^[0-9]+$/', $hero_id)) return 'Invalid/Empty Hero Id';
+        if(empty($hero_id) || !preg_match('/^[0-9]+$/', $hero_id)) return 'Invalid/Empty Hero Id';
 
         $data = $this->getJsonData($this->hero_url.$hero_id.'?locale='.$this->current_locale);
 
@@ -518,7 +521,7 @@ class Diablo3 {
      *     (item_data) - String of item data (e.g. 'item/COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD')
      */
     public function getItem($item_data = null) {
-        if($item_data == null) return 'Empty Item Data';
+        if(empty($item_data)) return 'Empty Item Data';
 
         $data = $this->getJsonData($this->item_url.$item_data.'?locale='.$this->current_locale);
 
@@ -528,7 +531,7 @@ class Diablo3 {
             return 'No Data Return';
         }
     }
-    
+
     /**
      * getItemById
      * Gets item data by ID
@@ -537,7 +540,7 @@ class Diablo3 {
      *     (item_id) - String of item id (e.g. 'Unique_Helm_006_104')
      */
     public function getItemById($item_id = null) {
-        if($item_id == null) return 'Empty Item ID';
+        if(empty($item_id)) return 'Empty Item ID';
 
         $data = $this->getJsonData($this->item_url.'item/'.$item_id.'?locale='.$this->current_locale);
 
@@ -556,7 +559,7 @@ class Diablo3 {
      *     (follower_type) - String of the type of follower. Options available: 'enchantress', 'templar' & 'scoundrel'
      */
     public function getFollower($follower_type = null) {
-        if($follower_type == null || !in_array($follower_type, $this->followerTypes, true)) return 'Invalid/Empty Follower Type';
+        if(empty($follower_type) || !in_array($follower_type, $this->followerTypes, true)) return 'Invalid/Empty Follower Type';
 
         $data = $this->getJsonData($this->follower_url.$follower_type.'?locale='.$this->current_locale);
 
@@ -575,7 +578,7 @@ class Diablo3 {
      *     (artisan_type) - String of the type of artisan. Options available: 'blacksmith' & 'jeweler'
      */
     public function getArtisan($artisan_type = null) {
-        if($artisan_type == null || !in_array($artisan_type, $this->artisanTypes, true)) return 'Invalid/Empty Artisan Type';
+        if(empty($artisan_type) || !in_array($artisan_type, $this->artisanTypes, true)) return 'Invalid/Empty Artisan Type';
 
         $data = $this->getJsonData($this->artisan_url.$artisan_type.'?locale='.$this->current_locale);
 
