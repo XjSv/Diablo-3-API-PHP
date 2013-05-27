@@ -456,6 +456,25 @@ class Diablo3 {
             return 'No Data Return';
         }
     }
+    
+    /**
+     * getItemById
+     * Gets item data by ID
+     *
+     * Parameters:
+     *     (item_id) - String of item id (e.g. 'Unique_Helm_006_104')
+     */
+    public function getItemById($item_id = null) {
+        if($item_id == null) return 'Empty Item ID';
+
+        $data = $this->getJsonData($this->item_url.'item/'.$item_id.'?locale='.$this->current_locale);
+
+        if($data) {
+            return $data;
+        } else {
+            return 'No Data Return';
+        }
+    }
 
     /**
      * getFollower
