@@ -25,6 +25,9 @@ $CAREER_DATA        = $Diablo3->getCareer();
 //$SKILL_RUNE_TOOLTIP = $Diablo3->getSkillToolTip('rune/frenzy/a', false);                                  // tooltipUrl, true for jsonp
 //$PAPERDOLL          = $Diablo3->getPaperDoll('barbarian', 'female');                                      // Class, Gender
 
+//$Diablo3->getAllHeroSkillImages(3982160);   // Hero ID (int), Options: 64, 42 or 21.
+//$Diablo3->getAllHeroItemImages(3982160);    // Hero ID (int), Options: 'small', 'large'
+
 // Before handling the data check to make sure the return is an array
 //
 echo "<br>Career Data: <br>";
