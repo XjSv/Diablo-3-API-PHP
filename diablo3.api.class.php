@@ -29,16 +29,16 @@ class Diablo3 {
     private $item_img_sizes      = array('small', 'large');
     private $skill_img_url;
     private $skill_img_sizes     = array('21', '42', '64');
-    private $item_save_loc       = '/img/items/';       // Relative to DOCUMENT_ROOT
-    private $skills_save_loc     = '/img/skills/';      // Relative to DOCUMENT_ROOT
-    private $paperdolls_save_loc = '/img/paperdolls/';  // Relative to DOCUMENT_ROOT
+    private $item_save_loc       = '/Diablo-3-API-PHP/img/items/';       // Relative to DOCUMENT_ROOT
+    private $skills_save_loc     = '/Diablo-3-API-PHP/img/skills/';      // Relative to DOCUMENT_ROOT
+    private $paperdolls_save_loc = '/Diablo-3-API-PHP/img/paperdolls/';  // Relative to DOCUMENT_ROOT
     private $skill_url;
     private $paperdoll_url;
     private $genders             = array('male', 'female');
     private $classes             = array('barbarian', 'witch-doctor', 'demon-hunter', 'monk', 'wizard');
-    private $authenticate        = AUTHENTICATION;       // Set to true for authenticated calls
-    private $API_private_key     = BLIZZARD_PRIVATE_KEY; // API Private Key
-    private $API_public_key      = BLIZZARD_PUBLIC_KEY;  // API Public Key
+    private $authenticate        = false;       // Set to true for authenticated calls
+    private $API_private_key     = '';          // API Private Key
+    private $API_public_key      = '';          // API Public Key
     private $last_time_accessed  = 0;
 
     public function __construct($battlenet_tag, $server = 'us', $locale = 'en_US') {
@@ -99,8 +99,8 @@ class Diablo3 {
      * @return boolean               [description]
      */
     public function checkBattletag($battlenet_tag) {
-        /*$pattern = '/^[\p{L}\p{Mn}][\p{L}\p{Mn}0-9]{2,11}-[0-9]{4,5}+$/u';
-        return (preg_match($pattern, $battlenet_tag)) ? true : false;*/
+        $pattern = '/^[\p{L}\p{Mn}][\p{L}\p{Mn}0-9]{2,11}-[0-9]{4,5}+$/u';
+        return (preg_match($pattern, $battlenet_tag)) ? true : false;
         return true;
     }
 
@@ -112,9 +112,9 @@ class Diablo3 {
      *     (name) - about this param
      */
     private function cURLcheckBasics() {
-        if(!function_exists("curl_init") &&
+        if(!function_exists("curl_init")   &&
            !function_exists("curl_setopt") &&
-           !function_exists("curl_exec") &&
+           !function_exists("curl_exec")   &&
            !function_exists("curl_close")) return false;
         else return true;
     }
@@ -317,6 +317,32 @@ class Diablo3 {
 
         return $data;
     }
+    
+    /**
+     * getAllItemImages
+     * Gets all the item images from a hero ID. If no size is passed both will be processed
+     * 
+     * @param  int    $heroId [description]
+     * @param  string $size    [description]
+     * 
+     */
+    public function getAllItemImages($heroId, $size = '') {
+        if(empty($heroId)) return 'Hero ID Empty';
+        
+        $hero_data = $this->getHero($heroeID);
+        if(is_array($hero_data)) {
+            foreach($hero_data['items'] as $key) {
+                if(empty($size)) {
+                    $item_image_small = $this->getItemImage($key['icon'], 'small');
+                    $item_image_large = $this->getItemImage($key['icon'], 'large');
+                } else {
+                    $item_image = $this->getItemImage($key['icon'], $size);
+                }   
+            }
+        } else {
+            return 'No Data Return';
+        }
+    }
 
     /**
      * getItemImage
@@ -338,6 +364,53 @@ class Diablo3 {
         }
     }
 
+/**
+     * getAllSkillImages
+     * Get all the skill images from a heroe ID
+     * 
+     * @param  int    $heroId  The heroe id
+     * @param  string $size    The size : 64, 42, 21
+     * @return string          Error message if no valid size is sent
+     * 
+     */
+    public function getAllSkillImages($heroId, $size = '') {
+        if(empty($heroId)) return 'Hero ID Empty';
+        
+        $hero_data = $this->getHero($heroId);
+
+        if(is_array($hero_data)) {
+            foreach($hero_data['skills']['active'] as $skills) {
+                if(isset($skills['skill']['icon'])) {
+                    $skillname = $skills['skill']['icon'];
+                    
+                    // Checking the size
+                    switch($size) {
+                        case '64':
+                            $this->getSkillImage($skillname, '64');
+                            break;
+                        case '41':
+                            $this->getSkillImage($skillname, '42');
+                            break;
+                        case '21':
+                            $this->getSkillImage($skillname, '21');
+                            break;
+                        case '':
+                            $this->getSkillImage($skillname, '64');
+                            $this->getSkillImage($skillname, '42');
+                            $this->getSkillImage($skillname, '21');
+                            break;
+                        default:
+                            error_log("Not a correct image size. Choose between 64, 42 or 21.");
+                            return "Not a correct image size. Choose between 64, 42 or 21.";
+                            break;
+                    }
+                }
+            }
+        } else {
+            return 'No Data Return';
+        }
+    }
+    
     /**
      * getSkillImage
      * Gets skill image
