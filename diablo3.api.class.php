@@ -442,8 +442,7 @@ class Diablo3 {
      * Gets item data
      *
      * Parameters:
-     *     (item_data) - String of item data without the "item/" in front of it
-     *                   (e.g. 'COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD')
+     *     (item_data) - String of item data (e.g. 'item/COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD')
      */
     public function getItem($item_data = null) {
         if($item_data == null) return 'Empty Item Data';
