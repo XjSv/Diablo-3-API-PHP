@@ -32,6 +32,8 @@ class Diablo3 {
     private $item_save_loc       = '/Diablo-3-API-PHP/img/items/';       // Relative to DOCUMENT_ROOT
     private $skills_save_loc     = '/Diablo-3-API-PHP/img/skills/';      // Relative to DOCUMENT_ROOT
     private $paperdolls_save_loc = '/Diablo-3-API-PHP/img/paperdolls/';  // Relative to DOCUMENT_ROOT
+    private $cache_loc           = '/Diablo-3-API-PHP/cache/';           // Relative to DOCUMENT_ROOT
+    private $use_cache           = true;                                 // Set to true to use 'If-Modified-Since' header
     private $skill_url;
     private $paperdoll_url;
     private $genders             = array('male', 'female');
@@ -228,23 +230,17 @@ class Diablo3 {
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 20);
-        curl_setopt($curl, CURLOPT_TIMEOUT,        10);
+        curl_setopt($curl, CURLOPT_TIMEOUT,        25);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_MAXREDIRS,      5);
         curl_setopt($curl, CURLOPT_HEADER,         false);
         curl_setopt($curl, CURLOPT_FRESH_CONNECT,  true);
         curl_setopt($curl, CURLOPT_PROTOCOLS,      CURLPROTO_HTTP);
-
-        // Check last accessed time
-        //
-        if($this->last_time_accessed > 0) {
-            $last_time_accessed = $this->last_time_accessed / 1000;
-            curl_setopt($ch, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
-            curl_setopt($ch, CURLOPT_TIMEVALUE,     $last_time_accessed);
-        }
+        curl_setopt($curl, CURLOPT_FILETIME,       true);
 
         // Authenticate with Battle.net
         //
+        $header = array();
         if($this->authenticate) {
             date_default_timezone_set('GMT');
             $request_url = str_replace('http://'.$this->current_server.$this->host, '', $url);
@@ -258,6 +254,25 @@ class Diablo3 {
             curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
         }
 
+        $file_time = 0;
+        if($this->use_cache) {
+            $url_md5    = md5($url);
+            $cache_file = $_SERVER['DOCUMENT_ROOT'].$this->cache_loc.$url_md5;
+
+            if(file_exists($cache_file) && is_readable($cache_file)) {
+                $json_decode = json_decode(file_get_contents($cache_file), true);
+                $file_time   = $json_decode['Last-Modified'];
+                $file_data   = $json_decode['Data'];
+            } else {
+                error_log('Cache File Does Not Exist Or Is Not Readable');
+            }
+
+            if($file_time > 0) {
+                curl_setopt($curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+                curl_setopt($curl, CURLOPT_TIMEVALUE,     $file_time);
+            }
+        }
+
         $data       = curl_exec($curl);
         $error_no   = curl_errno($curl);
         $curl_error = curl_error($curl);
@@ -269,12 +284,27 @@ class Diablo3 {
             $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
             if($http_status >= 400 && $http_status <= 599) {
-                error_log('Error Data Return: '.$data);
+                error_log('Error Data Return: '.$data.', HTTP Status Code: '.$http_status.', URL: '.$url);
                 $data = false;
             } else if($http_status >= 200 && $http_status <= 399) {
-                // HTTP status good
+                if($this->use_cache) {
+                    if($http_status == 304) {
+                        if(file_exists($cache_file) && is_readable($cache_file)) {
+                            $file_data = json_decode(file_get_contents($cache_file), true);
+                            $data      = $file_data['Data'];
+                        }
+                    } else {
+                        $last_modified = curl_getinfo($curl, CURLINFO_FILETIME);
+                        if(is_dir($_SERVER['DOCUMENT_ROOT'].$this->cache_loc) && is_writable($_SERVER['DOCUMENT_ROOT'].$this->cache_loc)) {
+                            $data_write = json_encode(array('Last-Modified' => $last_modified, 'Data' => $data));
+                            file_put_contents($cache_file, $data_write);
+                        } else {
+                            error_log('Cache Directory Must Be Writable. HTTP Code: '.$http_status);
+                        }
+                    }
+                }
             } else {
-                error_log('Error Data Return: '.$data);
+                error_log('Error Data Return: '.$data.' HTTP Status Code: '.$http_status.', URL: '.$url);
                 $data = false;
             }
         }
@@ -309,10 +339,14 @@ class Diablo3 {
 
         $data = $this->curlRequest($url);
 
-        if($data) $data = json_decode($data, true);
+        if(!empty($data)) $data = json_decode($data, true);
 
-        if(isset($data['code']) && (in_array($data['code'], $this->blizzardErrors, true))) {
-            error_log('API Fail Reason: '.$data['reason'].' URL: '.$url);
+        if(isset($data['code']) && isset($data['reason'])) {
+            if(in_array($data['code'], $this->blizzardErrors, true)) {
+                error_log('API Fail Reason: '.$data['reason'].', Code: '.$data['code'].' URL: '.$url);
+            } else {
+                error_log('API Fail Reason Unknown, URL: '.$url);
+            }
             $data = false;
         }
 
@@ -360,7 +394,7 @@ class Diablo3 {
 
         $data = $this->curlSaveImage('items', $this->item_img_url.$imageSize.'/'.$icon.'.png', $icon, $imageSize);
 
-        if($data) {
+        if(!empty($data)) {
             return $data;
         } else {
             return 'No Data Return';
@@ -387,6 +421,7 @@ class Diablo3 {
                     $skill_name = $skills['skill']['icon'];
 
                     // Checking the size
+                    //
                     switch($size) {
                         case '64':
                             $this->getSkillImage($skill_name, '64');
@@ -427,7 +462,7 @@ class Diablo3 {
 
         $data = $this->curlSaveImage('skills', $this->skill_img_url.$imageSize.'/'.$icon.'.png', $icon, $imageSize);
 
-        if($data) {
+        if(!empty($data)) {
             return $data;
         } else {
             return 'No Data Return';
@@ -452,7 +487,7 @@ class Diablo3 {
 
         $data = $this->curlRequest($this->skill_url.$tooltipUrl.$jsonp_ext);
 
-        if($data) {
+        if(!empty($data)) {
             return $data;
         } else {
             return 'No Data Return';
@@ -472,7 +507,7 @@ class Diablo3 {
 
         $data = $this->curlSaveImage('paperdolls', $this->paperdoll_url.$class.'-'.$gender.'.jpg', $class.'-'.$gender);
 
-        if($data) {
+        if(!empty($data)) {
             return $data;
         } else {
             return 'No Data Return';
@@ -487,7 +522,7 @@ class Diablo3 {
     public function getCareer() {
         $data = $this->getJsonData($this->career_url.'?locale='.$this->current_locale);
 
-        if($data) {
+        if(!empty($data)) {
             return $data;
         } else {
             return 'No Data Return';
@@ -506,7 +541,7 @@ class Diablo3 {
 
         $data = $this->getJsonData($this->hero_url.$hero_id.'?locale='.$this->current_locale);
 
-        if($data) {
+        if(!empty($data)) {
             return $data;
         } else {
             return 'No Data Return';
@@ -525,7 +560,7 @@ class Diablo3 {
 
         $data = $this->getJsonData($this->item_url.$item_data.'?locale='.$this->current_locale);
 
-        if($data) {
+        if(!empty($data)) {
             return $data;
         } else {
             return 'No Data Return';
@@ -544,7 +579,7 @@ class Diablo3 {
 
         $data = $this->getJsonData($this->item_url.'item/'.$item_id.'?locale='.$this->current_locale);
 
-        if($data) {
+        if(!empty($data)) {
             return $data;
         } else {
             return 'No Data Return';
@@ -563,7 +598,7 @@ class Diablo3 {
 
         $data = $this->getJsonData($this->follower_url.$follower_type.'?locale='.$this->current_locale);
 
-        if($data) {
+        if(!empty($data)) {
             return $data;
         } else {
             return 'No Data Return';
@@ -582,7 +617,7 @@ class Diablo3 {
 
         $data = $this->getJsonData($this->artisan_url.$artisan_type.'?locale='.$this->current_locale);
 
-        if($data) {
+        if(!empty($data)) {
             return $data;
         } else {
             return 'No Data Return';

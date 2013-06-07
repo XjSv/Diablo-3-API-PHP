@@ -1,24 +1,26 @@
 # Diablo 3 API PHP
-Diablo 3 Web API PHP Bridge
+Diablo 3 Web API PHP Wrapper/Bridge
 
 This is meant to be very simple & easy to use.  
 You are free to re-purpose this for any other coding needs or projects.  
-
-Minimal validation is being done to the inputs. If you feel that is not enonugh, be my guest and improve it.
+Dual Licensed: MIT/GPL  
 
 Original API Documentation: http://blizzard.github.com/d3-api-docs/
 
+Supports authenticated API calls.
+
 Notes: 
-Image folder needs to be in the following structure: 
+Required Folder Structure: 
 - - -
+- cache  
 - img  
   - items  
-    - large  
-    - small  
+    -- large  
+    -- small  
   - skills  
-    - 21  
-    - 42  
-    - 64  
+    -- 21  
+    -- 42  
+    -- 64  
 
 - - -
 
@@ -35,6 +37,7 @@ Image folder needs to be in the following structure:
 #### Get Skill Tooltip
 #### Get Skill Rune Tooltip
 
-#### Get Paperdoll
+#### Get All Hero Item Images
+#### Get All Hero Skill Images
 
-Supports authenticated API calls.
+#### Get Paperdoll

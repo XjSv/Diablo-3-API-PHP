@@ -11,6 +11,8 @@ require_once('diablo3.api.class.php');
 // Settings
 set_time_limit(0);
 ini_set('memory_limit', '256M');
+error_reporting(E_ALL);
+ini_set('display_errors', true);
 
 $Diablo3            = new Diablo3("XjSv#1677", 'us', 'en_US');                                            // Battle Tag (e.g. 'XjSv#1677' or 'XjSv-1677') (string), Server: 'us', 'eu', etc. (string), Locale: 'en_US', 'es_MX', etc. (string)
 $CAREER_DATA        = $Diablo3->getCareer();
@@ -42,16 +44,16 @@ if(is_array($HERO_DATA)) {
     print_r($HERO_DATA);
 } else {
     echo $HERO_DATA; // Error message
-}
+}*/
 
-echo "<br>Item Data: <br>";
+/*echo "<br>Item Data: <br>";
 if(is_array($ITEM_DATA)) {
     print_r($ITEM_DATA);
 } else {
     echo $ITEM_DATA; // Error message
-}
+}*/
 
-echo "<br>Item Info Data: <br>";
+/*echo "<br>Item Info Data: <br>";
 if(is_array($ITEM_INFO_DATA)) {
     print_r($ITEM_INFO_DATA);
 } else {
@@ -63,9 +65,9 @@ if(is_array($FOLLOWER_DATA)) {
     print_r($FOLLOWER_DATA);
 } else {
     echo $FOLLOWER_DATA; // Error message
-}
+}*/
 
-echo "<br>Artisan Data: <br>";
+/*echo "<br>Artisan Data: <br>";
 if(is_array($ARTISAN_DATA)) {
     print_r($ARTISAN_DATA);
 } else {
