@@ -9,7 +9,6 @@ Original API Documentation: http://blizzard.github.com/d3-api-docs/
 
 Supports authenticated API calls.
 
-Notes: 
 Required Folder Structure: 
 - - -
 - cache  
