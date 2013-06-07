@@ -38,51 +38,48 @@ class Diablo3 {
     private $paperdoll_url;
     private $genders             = array('male', 'female');
     private $classes             = array('barbarian', 'witch-doctor', 'demon-hunter', 'monk', 'wizard');
-    private $authenticate        = false;       // Set to true for authenticated calls
+    private $authenticate        = false;                  // Set to true for authenticated calls
     private $API_private_key     = 'BLIZZARD_PRIVATE_KEY'; // API Private Key
     private $API_public_key      = 'BLIZZARD_PUBLIC_KEY';  // API Public Key
-    private $last_time_accessed  = 0;
+    private $no_battleTag        = false;
 
-    public function __construct($battlenet_tag, $server = 'us', $locale = 'en_US') {
+    public function __construct($battlenet_tag = '', $server = 'us', $locale = 'en_US') {
+        if(!in_array($server, $this->battlenet_servers, true)) {
+            $server = 'us';
+        } else if($server == 'cn') {
+            $server = '';
+
+            // Override
+            //
+            $this->host       = 'www.battlenet.com.cn';     // 'cn.battle.net'
+            $this->media_host = 'content.battlenet.com.cn'; // 'cn.media.blizzard.com'
+        }
+
+        if(!in_array($locale, $this->locales, true)) $locale = 'en_US';
+
+        $this->current_locale = $locale;
+        $this->current_server = $server;
+
         if(!empty($battlenet_tag)) {
             $hash = strpos($battlenet_tag, '#');
             if($hash !== false) {
                 $battlenet_tag = str_replace('#', '-', $battlenet_tag);
             }
 
-            if(!in_array($server, $this->battlenet_servers, true)) {
-                $server = 'us';
-            } else if($server == 'cn') {
-                $server = '';
-                $this->host = 'www.battlenet.com.cn'; // 'cn.battle.net'
-                $this->media_host = 'content.battlenet.com.cn'; // 'cn.media.blizzard.com'
-            }
-
-            if(!in_array($locale, $this->locales, true)) {
-                $locale = 'en_US';
-            }
-
             // Check if its a valid Battle.net tag
             //
-            if(!$this->checkBattletag($battlenet_tag)) {
+            if(!$this->validateBattletag($battlenet_tag)) {
                 error_log("Battle.net tag provided not valid. ({$battlenet_tag})");
                 exit(0);
             }
 
-            // Set Variables
-            //
-            $this->current_locale = $locale;
-            $this->current_server = $server;
             $this->battlenet_tag  = urlencode($battlenet_tag);
             $this->career_url     = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/index';
             $this->hero_url       = 'http://'.$server.$this->host.'/api/d3/profile/'.$this->battlenet_tag.'/hero/';
         } else {
-            error_log("Required Battle.net tag");
-            exit(0);
+            $this->no_battleTag = true;
         }
 
-        // TODO: Remove Battle.net Tag dependency if you want to just use this part of the API
-        //
         $this->item_url      = 'http://'.$server.$this->host.'/api/d3/data/';
         $this->follower_url  = 'http://'.$server.$this->host.'/api/d3/data/follower/';
         $this->artisan_url   = 'http://'.$server.$this->host.'/api/d3/data/artisan/';
@@ -93,14 +90,14 @@ class Diablo3 {
     }
 
     /**
-     * checkBattletag
+     * validateBattletag
      * Checks if the battle tag meets the requirements
      * https://us.battle.net/support/en/article/battletag-naming-policy
      *
      * @param  string $battlenet_tag [description]
      * @return boolean               [description]
      */
-    public function checkBattletag($battlenet_tag) {
+    public function validateBattletag($battlenet_tag) {
         $pattern = '/^[\p{L}\p{Mn}][\p{L}\p{Mn}0-9]{2,11}-[0-9]{4,5}+$/u';
         return (preg_match($pattern, $battlenet_tag)) ? true : false;
     }
@@ -315,19 +312,6 @@ class Diablo3 {
     }
 
     /**
-     * setLastTimeAccessed
-     * Checks to see if required cURL functions are available
-     *
-     * Parameters:
-     *     (date) - date time
-     */
-    public function setLastTimeAccessed($date = 0) {
-        $this->last_time_accessed = $date;
-
-        return true;
-    }
-
-    /**
      * getJsonData
      * Checks to see if required cURL functions are available
      *
@@ -365,6 +349,7 @@ class Diablo3 {
         if(empty($hero_id) || !preg_match('/^[0-9]+$/', $hero_id)) return 'Invalid/Empty Hero Id';
 
         $hero_data = $this->getHero($hero_id);
+
         if(is_array($hero_data)) {
             foreach($hero_data['items'] as $key) {
                 if(empty($size)) {
@@ -520,12 +505,15 @@ class Diablo3 {
      *
      */
     public function getCareer() {
-        $data = $this->getJsonData($this->career_url.'?locale='.$this->current_locale);
-
-        if(!empty($data)) {
-            return $data;
+        if($this->no_battleTag) {
+            return 'Function not available without a BattleTag.';
         } else {
-            return 'No Data Return';
+            $data = $this->getJsonData($this->career_url.'?locale='.$this->current_locale);
+            if(!empty($data)) {
+                return $data;
+            } else {
+                return 'No Data Return';
+            }
         }
     }
 
@@ -537,14 +525,18 @@ class Diablo3 {
      *     (hero_id) - Hero ID (integer)
      */
     public function getHero($hero_id = null) {
-        if(empty($hero_id) || !preg_match('/^[0-9]+$/', $hero_id)) return 'Invalid/Empty Hero Id';
-
-        $data = $this->getJsonData($this->hero_url.$hero_id.'?locale='.$this->current_locale);
-
-        if(!empty($data)) {
-            return $data;
+        if($this->no_battleTag) {
+            return 'Function not available without a BattleTag.';
         } else {
-            return 'No Data Return';
+            if(empty($hero_id) || !preg_match('/^[0-9]+$/', $hero_id)) return 'Invalid/Empty Hero Id';
+
+            $data = $this->getJsonData($this->hero_url.$hero_id.'?locale='.$this->current_locale);
+
+            if(!empty($data)) {
+                return $data;
+            } else {
+                return 'No Data Return';
+            }
         }
     }
 

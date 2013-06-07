@@ -14,21 +14,25 @@ ini_set('memory_limit', '256M');
 error_reporting(E_ALL);
 ini_set('display_errors', true);
 
-$Diablo3            = new Diablo3("XjSv#1677", 'us', 'en_US');                                            // Battle Tag (e.g. 'XjSv#1677' or 'XjSv-1677') (string), Server: 'us', 'eu', etc. (string), Locale: 'en_US', 'es_MX', etc. (string)
+$Diablo3            = new Diablo3(); // No Required Params
+//$Diablo3            = new Diablo3("XjSv#1677"); // BattleTag Only
+//$Diablo3            = new Diablo3('', 'us'); // Change Server Only
+//$Diablo3            = new Diablo3('', '', 'en_US'); // Change Language Only
+//$Diablo3            = new Diablo3("XjSv#1677", 'us', 'en_US'); // Battle Tag (e.g. 'XjSv#1677' or 'XjSv-1677') (string), Server: 'us', 'eu', etc. (string), Locale: 'en_US', 'es_MX', etc. (string)
 $CAREER_DATA        = $Diablo3->getCareer();
-//$HERO_DATA          = $Diablo3->getHero(3982160);                                                         // Hero ID (int)
-//$ITEM_DATA          = $Diablo3->getItem('item/COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD'); // Item Data 'item/COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD'  (string)
-//$ITEM_INFO_DATA     = $Diablo3->getItemById('Unique_Helm_006_104');                                       // Item ID 'getItemById'  (string)
-//$FOLLOWER_DATA      = $Diablo3->getFollower('templar');                                                   // Options: 'enchantress', 'templar', 'scoundrel' (string)
-//$ARTISAN_DATA       = $Diablo3->getArtisan('blacksmith');                                                 // Options: 'blacksmith', 'jeweler' (string)
-//$ITEM_IMAGE         = $Diablo3->getItemImage('unique_chest_013_104_demonhunter_male', 'large');           // Icon Name, Size: Options: 'small', 'large' (string)
-//$SKILL_IMAGE        = $Diablo3->getSkillImage('barbarian_frenzy', '64');                                  // Icon Name, Size: Options: '21', '42', '64' (string)
-//$SKILL_TOOLTIP      = $Diablo3->getSkillToolTip('skill/barbarian/frenzy', true);                          // tooltipUrl, true for jsonp
-//$SKILL_RUNE_TOOLTIP = $Diablo3->getSkillToolTip('rune/frenzy/a', false);                                  // tooltipUrl, true for jsonp
-//$PAPERDOLL          = $Diablo3->getPaperDoll('barbarian', 'female');                                      // Class, Gender
+//$HERO_DATA          = $Diablo3->getHero(3982160);  // Hero ID (int)
+$ITEM_DATA          = $Diablo3->getItem('item/COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD'); // Item Data 'item/COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD'  (string)
+//$ITEM_INFO_DATA     = $Diablo3->getItemById('Unique_Helm_006_104'); // Item ID 'getItemById'  (string)
+//$FOLLOWER_DATA      = $Diablo3->getFollower('templar'); // Options: 'enchantress', 'templar', 'scoundrel' (string)
+//$ARTISAN_DATA       = $Diablo3->getArtisan('blacksmith'); // Options: 'blacksmith', 'jeweler' (string)
+//$ITEM_IMAGE         = $Diablo3->getItemImage('unique_chest_013_104_demonhunter_male', 'large'); // Icon Name, Size: Options: 'small', 'large' (string)
+//$SKILL_IMAGE        = $Diablo3->getSkillImage('barbarian_frenzy', '64'); // Icon Name, Size: Options: '21', '42', '64' (string)
+//$SKILL_TOOLTIP      = $Diablo3->getSkillToolTip('skill/barbarian/frenzy', true); // tooltipUrl, true for jsonp
+//$SKILL_RUNE_TOOLTIP = $Diablo3->getSkillToolTip('rune/frenzy/a', false); // tooltipUrl, true for jsonp
+//$PAPERDOLL          = $Diablo3->getPaperDoll('barbarian', 'female');  // Class, Gender
 
-//$Diablo3->getAllHeroSkillImages(3982160);   // Hero ID (int), Options: 64, 42 or 21.
-//$Diablo3->getAllHeroItemImages(3982160);    // Hero ID (int), Options: 'small', 'large'
+//$Diablo3->getAllHeroSkillImages(3982160); // Hero ID (int), Options: 64, 42 or 21.
+//$Diablo3->getAllHeroItemImages(3982160); // Hero ID (int), Options: 'small', 'large'
 
 // Before handling the data check to make sure the return is an array
 //
@@ -46,12 +50,12 @@ if(is_array($HERO_DATA)) {
     echo $HERO_DATA; // Error message
 }*/
 
-/*echo "<br>Item Data: <br>";
+echo "<br>Item Data: <br>";
 if(is_array($ITEM_DATA)) {
     print_r($ITEM_DATA);
 } else {
     echo $ITEM_DATA; // Error message
-}*/
+}
 
 /*echo "<br>Item Info Data: <br>";
 if(is_array($ITEM_INFO_DATA)) {
