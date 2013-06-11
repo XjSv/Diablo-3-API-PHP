@@ -42,6 +42,7 @@ class Diablo3 {
     private $API_private_key     = 'BLIZZARD_PRIVATE_KEY'; // API Private Key
     private $API_public_key      = 'BLIZZARD_PUBLIC_KEY';  // API Public Key
     private $no_battleTag        = false;
+    private $fromCache           = false;
 
     public function __construct($battlenet_tag = '', $server = 'us', $locale = 'en_US') {
         if(!in_array($server, $this->battlenet_servers, true)) {
@@ -273,6 +274,8 @@ class Diablo3 {
         $data       = curl_exec($curl);
         $error_no   = curl_errno($curl);
         $curl_error = curl_error($curl);
+        
+        $this->fromCache = false;
 
         if($error_no) {
             error_log('cURL Error: '.$error_no.' ('.$curl_error.') URL: '.$url);
@@ -289,6 +292,7 @@ class Diablo3 {
                         if(file_exists($cache_file) && is_readable($cache_file)) {
                             $file_data = json_decode(file_get_contents($cache_file), true);
                             $data      = $file_data['Data'];
+                            $this->fromCache = true;
                         }
                     } else {
                         $last_modified = curl_getinfo($curl, CURLINFO_FILETIME);
@@ -309,6 +313,15 @@ class Diablo3 {
         curl_close($curl);
 
         return $data;
+    }
+    
+    /**
+     * resultsFromCache
+     * Checks to see if fromCache value
+     *
+     */
+    public function resultsFromCache() {
+        return $this->fromCache;
     }
 
     /**
