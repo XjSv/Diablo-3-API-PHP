@@ -129,7 +129,10 @@ class Diablo3 {
      *     (size)     - image sizes
      */
     private function curlSaveImage($location, $url, $icon, $size = '') {
-        if(empty($location) || empty($url) || empty($icon)) return false;
+        if(empty($url) || empty($icon)) {
+            error_log('URL or Icon Cannot Be Empty');
+            return false;
+        }
 
         switch($location) {
             case 'items':
@@ -151,7 +154,9 @@ class Diablo3 {
                 $ext             = '.jpg';
                 break;
             default:
+                error_log('Location Cannot Be Empty');
                 return false;
+                break;
         }
 
         if(!file_exists($real_item_path.$size.$icon.$ext)) {
@@ -216,7 +221,11 @@ class Diablo3 {
      *     (url) - a valid URL
      */
     private function curlRequest($url) {
-        if(empty($url)) return false;
+        if(empty($url)) {
+            error_log("URL Cannot Be Empty");
+            return false;
+        }
+
         if(!$this->cURLcheckBasics()) {
             error_log("cURL is NOT Available");
             return false;
@@ -274,7 +283,7 @@ class Diablo3 {
         $data       = curl_exec($curl);
         $error_no   = curl_errno($curl);
         $curl_error = curl_error($curl);
-        
+
         $this->fromCache = false;
 
         if($error_no) {
@@ -314,7 +323,7 @@ class Diablo3 {
 
         return $data;
     }
-    
+
     /**
      * resultsFromCache
      * Checks to see if fromCache value
@@ -359,7 +368,10 @@ class Diablo3 {
      *
      */
     public function getAllHeroItemImages($hero_id = null, $size = '') {
-        if(empty($hero_id) || !preg_match('/^[0-9]+$/', $hero_id)) return 'Invalid/Empty Hero Id';
+        if(empty($hero_id) || !preg_match('/^[0-9]+$/', $hero_id)) {
+            error_log('Invalid/Empty Hero Id');
+            return false;
+        }
 
         $hero_data = $this->getHero($hero_id);
 
@@ -371,11 +383,15 @@ class Diablo3 {
                 } else {
                     if(in_array($size, $this->item_img_sizes, true)) {
                         $this->getItemImage($key['icon'], $size);
+                    } else {
+                        error_log("Invalid Size");
+                        return false;
                     }
                 }
+                return true;
             }
         } else {
-            return 'No Data Return';
+            return false;
         }
     }
 
@@ -388,15 +404,13 @@ class Diablo3 {
      *     (imageSize) - Size of image (small or large)
      */
     public function getItemImage($icon = null, $imageSize = 'small') {
-        if(empty($icon) || !in_array($imageSize, $this->item_img_sizes, true)) return 'Icon Name Empty or Invalid Size';
+        if(empty($icon) || !in_array($imageSize, $this->item_img_sizes, true)) {
+            error_log('Icon Name Empty or Invalid Size');
+            return false;
+        }
 
         $data = $this->curlSaveImage('items', $this->item_img_url.$imageSize.'/'.$icon.'.png', $icon, $imageSize);
-
-        if(!empty($data)) {
-            return $data;
-        } else {
-            return 'No Data Return';
-        }
+        return $data;
     }
 
     /**
@@ -408,42 +422,46 @@ class Diablo3 {
      * @return string          Error message if no valid size is sent
      *
      */
-    public function getAllHeroSkillImages($hero_id = null, $size = '') {
-        if(empty($hero_id) || !preg_match('/^[0-9]+$/', $hero_id)) return 'Invalid/Empty Hero Id';
+    public function getAllHeroSkillImages($hero_id = null, $size = null) {
+        if(empty($hero_id) || !preg_match('/^[0-9]+$/', $hero_id)) {
+            error_log('Invalid/Empty Hero Id');
+            return false;
+        }
 
         $hero_data = $this->getHero($hero_id);
 
         if(is_array($hero_data)) {
             foreach($hero_data['skills']['active'] as $skills) {
                 if(isset($skills['skill']['icon'])) {
-                    $skill_name = $skills['skill']['icon'];
+                    $skill_icon = $skills['skill']['icon'];
 
                     // Checking the size
                     //
                     switch($size) {
-                        case '64':
-                            $this->getSkillImage($skill_name, '64');
+                        case 64:
+                            $this->getSkillImage($skill_icon, '64');
                             break;
-                        case '41':
-                            $this->getSkillImage($skill_name, '42');
+                        case 42:
+                            $this->getSkillImage($skill_icon, '42');
                             break;
-                        case '21':
-                            $this->getSkillImage($skill_name, '21');
+                        case 21:
+                            $this->getSkillImage($skill_icon, '21');
                             break;
-                        case '':
-                            $this->getSkillImage($skill_name, '64');
-                            $this->getSkillImage($skill_name, '42');
-                            $this->getSkillImage($skill_name, '21');
+                        case null:
+                            $this->getSkillImage($skill_icon, '64');
+                            $this->getSkillImage($skill_icon, '42');
+                            $this->getSkillImage($skill_icon, '21');
                             break;
                         default:
                             error_log("Not a correct image size. Choose between 64, 42 or 21.");
-                            return "Not a correct image size. Choose between 64, 42 or 21.";
+                            return false;
                             break;
                     }
+                    return true;
                 }
             }
         } else {
-            return 'No Data Return';
+            return false;
         }
     }
 
@@ -459,12 +477,7 @@ class Diablo3 {
         if(empty($icon) || !in_array($imageSize, $this->skill_img_sizes, true)) return 'Icon Name Empty or Invalid Size';
 
         $data = $this->curlSaveImage('skills', $this->skill_img_url.$imageSize.'/'.$icon.'.png', $icon, $imageSize);
-
-        if(!empty($data)) {
-            return $data;
-        } else {
-            return 'No Data Return';
-        }
+        return $data;
     }
 
     /**
@@ -484,12 +497,7 @@ class Diablo3 {
         }
 
         $data = $this->curlRequest($this->skill_url.$tooltipUrl.$jsonp_ext);
-
-        if(!empty($data)) {
-            return $data;
-        } else {
-            return 'No Data Return';
-        }
+        return $data;
     }
 
     /**
@@ -504,12 +512,7 @@ class Diablo3 {
         if(empty($class) || !in_array($class, $this->classes, true) || !in_array($gender, $this->genders, true)) return 'No/Wrong class provided or wrong gender type.';
 
         $data = $this->curlSaveImage('paperdolls', $this->paperdoll_url.$class.'-'.$gender.'.jpg', $class.'-'.$gender);
-
-        if(!empty($data)) {
-            return $data;
-        } else {
-            return 'No Data Return';
-        }
+        return $data;
     }
 
     /**
@@ -519,14 +522,11 @@ class Diablo3 {
      */
     public function getCareer() {
         if($this->no_battleTag) {
-            return 'Function not available without a BattleTag.';
+            error_log('Function not available without a BattleTag.');
+            return false;
         } else {
             $data = $this->getJsonData($this->career_url.'?locale='.$this->current_locale);
-            if(!empty($data)) {
-                return $data;
-            } else {
-                return 'No Data Return';
-            }
+            return $data;
         }
     }
 
@@ -539,17 +539,14 @@ class Diablo3 {
      */
     public function getHero($hero_id = null) {
         if($this->no_battleTag) {
-            return 'Function not available without a BattleTag.';
+             error_log('Function not available without a BattleTag.');
+             return false;
         } else {
             if(empty($hero_id) || !preg_match('/^[0-9]+$/', $hero_id)) return 'Invalid/Empty Hero Id';
 
             $data = $this->getJsonData($this->hero_url.$hero_id.'?locale='.$this->current_locale);
 
-            if(!empty($data)) {
-                return $data;
-            } else {
-                return 'No Data Return';
-            }
+            return $data;
         }
     }
 
@@ -561,15 +558,14 @@ class Diablo3 {
      *     (item_data) - String of item data (e.g. 'item/COGHsoAIEgcIBBXIGEoRHYQRdRUdnWyzFB2qXu51MA04kwNAAFAKYJMD')
      */
     public function getItem($item_data = null) {
-        if(empty($item_data)) return 'Empty Item Data';
+        if(empty($item_data)) {
+            error_log('Item Data Cannot Be Empty');
+            return false;
+        }
 
         $data = $this->getJsonData($this->item_url.$item_data.'?locale='.$this->current_locale);
 
-        if(!empty($data)) {
-            return $data;
-        } else {
-            return 'No Data Return';
-        }
+        return $data;
     }
 
     /**
@@ -580,15 +576,14 @@ class Diablo3 {
      *     (item_id) - String of item id (e.g. 'Unique_Helm_006_104')
      */
     public function getItemById($item_id = null) {
-        if(empty($item_id)) return 'Empty Item ID';
+        if(empty($item_id)) {
+            error_log('Item ID Cannot Be Empty');
+            return false;
+        }
 
         $data = $this->getJsonData($this->item_url.'item/'.$item_id.'?locale='.$this->current_locale);
 
-        if(!empty($data)) {
-            return $data;
-        } else {
-            return 'No Data Return';
-        }
+        return $data;
     }
 
     /**
@@ -599,15 +594,14 @@ class Diablo3 {
      *     (follower_type) - String of the type of follower. Options available: 'enchantress', 'templar' & 'scoundrel'
      */
     public function getFollower($follower_type = null) {
-        if(empty($follower_type) || !in_array($follower_type, $this->followerTypes, true)) return 'Invalid/Empty Follower Type';
+        if(empty($follower_type) || !in_array($follower_type, $this->followerTypes, true)) {
+            error_log('Invalid/Empty Follower Type');
+            return false;
+        }
 
         $data = $this->getJsonData($this->follower_url.$follower_type.'?locale='.$this->current_locale);
 
-        if(!empty($data)) {
-            return $data;
-        } else {
-            return 'No Data Return';
-        }
+        return $data;
     }
 
     /**
@@ -618,15 +612,14 @@ class Diablo3 {
      *     (artisan_type) - String of the type of artisan. Options available: 'blacksmith' & 'jeweler'
      */
     public function getArtisan($artisan_type = null) {
-        if(empty($artisan_type) || !in_array($artisan_type, $this->artisanTypes, true)) return 'Invalid/Empty Artisan Type';
+        if(empty($artisan_type) || !in_array($artisan_type, $this->artisanTypes, true)) {
+            error_log('Invalid/Empty Artisan Type');
+            return false;
+        }
 
         $data = $this->getJsonData($this->artisan_url.$artisan_type.'?locale='.$this->current_locale);
 
-        if(!empty($data)) {
-            return $data;
-        } else {
-            return 'No Data Return';
-        }
+        return $data;
     }
 
     public function __desctruct() {
