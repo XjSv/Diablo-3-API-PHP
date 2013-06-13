@@ -1,12 +1,16 @@
 <?php
 /**
-* Diablo 3 Web API PHP Bridge
 *
-* This is meant to be very simple & easy to use.
-* You are free to repurpose this for any other coding needs or projects.
-*
-*
+* @Author Armando Tresova <xjsv24@gmail.com>
 * @link http://www.armandotresova.com/projects/diablo_3_api_php.html
+* @license Dual Licensed: MIT/GPL
+*
+* A Diablo 3 Web API wrapper written in PHP.
+* This is meant to be very simple, easy to use and modify.
+* It supports authenticated API calls and 'If-Modified-Since' header.
+*
+* Original Blizzard API Documentation: http://blizzard.github.com/d3-api-docs/
+*
 */
 
 class Diablo3 {
