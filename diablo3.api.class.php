@@ -41,7 +41,7 @@ class Diablo3 {
     private $skill_url;
     private $paperdoll_url;
     private $genders             = array('male', 'female');
-    private $classes             = array('barbarian', 'witch-doctor', 'demon-hunter', 'monk', 'wizard');
+    private $classes             = array('barbarian', 'crusader', 'witch-doctor', 'demon-hunter', 'monk', 'wizard');
     private $authenticate        = false;                  // Set to true for authenticated calls
     private $API_private_key     = 'BLIZZARD_PRIVATE_KEY'; // API Private Key
     private $API_public_key      = 'BLIZZARD_PUBLIC_KEY';  // API Public Key
