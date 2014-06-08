@@ -392,8 +392,9 @@ class Diablo3 {
                         return false;
                     }
                 }
-                return true;
             }
+
+            return true;
         } else {
             return false;
         }
@@ -461,9 +462,10 @@ class Diablo3 {
                             return false;
                             break;
                     }
-                    return true;
                 }
             }
+
+            return true;
         } else {
             return false;
         }
