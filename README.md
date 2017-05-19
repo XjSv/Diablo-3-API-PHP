@@ -1,3 +1,5 @@
+# !!! No longer working due to changes to the API !!!
+
 # Diablo 3 API PHP
 A Diablo 3 Web API wrapper written in PHP.
 
